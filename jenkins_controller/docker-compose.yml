@@ -1,0 +1,29 @@
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - jenkins_net
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    restart: unless-stopped
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    networks:
+      - jenkins_net
+
+volumes:
+  caddy_data:
+  caddy_config:
+  jenkins_home:
+
+networks:
+  jenkins_net:

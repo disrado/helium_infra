@@ -1,0 +1,20 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+ssh_pwauth: false
+
+packages:
+  - ufw
+  - fail2ban
+
+runcmd:
+  - curl -fsSL https://get.docker.com | sh
+  - systemctl enable docker
+  - systemctl start docker
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw --force enable
+  - systemctl enable fail2ban
+  - systemctl start fail2ban
