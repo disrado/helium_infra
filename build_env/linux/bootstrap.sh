@@ -6,7 +6,7 @@ JENKINS_SECRET="${2:?}"
 JENKINS_AGENT_NAME="${3:?}"
 
 cd "$(dirname "$0")"
-docker build -t helium-build-env:latest .
+docker build -t helium-linux-build-env:latest .
 
 docker run -d --name "$JENKINS_AGENT_NAME" --restart unless-stopped \
   -e JENKINS_URL="$JENKINS_URL" \
