@@ -8,6 +8,8 @@ JENKINS_AGENT_NAME="${3:?}"
 cd "$(dirname "$0")"
 docker build -t helium-linux-build-env:latest .
 
+docker build -t helium-linux-jenkins-agent:latest ../../jenkins_agent/linux
+
 docker run -d --name "$JENKINS_AGENT_NAME" --restart unless-stopped \
   -e JENKINS_URL="$JENKINS_URL" \
   -e JENKINS_SECRET="$JENKINS_SECRET" \
@@ -15,4 +17,4 @@ docker run -d --name "$JENKINS_AGENT_NAME" --restart unless-stopped \
   -e JENKINS_WEB_SOCKET=true \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v jenkins_agent_workdir:/home/jenkins/agent \
-  jenkins/inbound-agent:latest
+  helium-linux-jenkins-agent:latest
