@@ -77,8 +77,9 @@ if (-not (Test-Path $wslConfigPath) -or (Get-Content $wslConfigPath -Raw) -notma
 # WSL2 doesn't auto-start on Windows boot, and (even with the idle-timeout config
 # above) a distro with nothing attached can still idle out. `sleep infinity` keeps
 # a permanently-attached session running, both recovering after reboot and keeping
-# dockerd/wsl-agent alive on an ongoing basis.
-schtasks.exe /create /tn "wsl-autostart" /tr "wsl.exe -d $Distro -- sleep infinity" /sc onstart /ru SYSTEM /rl highest /f
+# dockerd/wsl-agent alive on an ongoing basis. Runs as the current user, not SYSTEM -
+# WSL distros are per-user, so SYSTEM can't see a distro registered under this account.
+schtasks.exe /create /tn "wsl-autostart" /tr "wsl.exe -d $Distro -- sleep infinity" /sc onstart /ru "$env:USERNAME" /rl highest /f
 
 # /create only registers it for future boots - run it once now too, so the
 # keep-alive is active for this session without needing an actual reboot.
