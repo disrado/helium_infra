@@ -18,6 +18,9 @@ DOCKER_GID="$(getent group docker | cut -d: -f3)"
 sudo mkdir -p /home/jenkins/agent
 sudo chown -R 1000:1000 /home/jenkins/agent
 
+# safe to re-run: removes any leftover container from an interrupted prior attempt
+docker rm -f "$JENKINS_AGENT_NAME" 2>/dev/null || true
+
 docker run -d --name "$JENKINS_AGENT_NAME" --restart unless-stopped \
   --group-add "$DOCKER_GID" \
   -e JENKINS_URL="$JENKINS_URL" \
@@ -44,7 +47,6 @@ done
 if [ "$CONNECTED" != "true" ]; then
     echo "ERROR: agent did not connect to Jenkins. Recent logs:" >&2
     docker logs --tail 20 "$JENKINS_AGENT_NAME" >&2
-    docker rm -f "$JENKINS_AGENT_NAME"
     exit 1
 fi
 

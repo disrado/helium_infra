@@ -100,7 +100,6 @@ sudo grep -q "^$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers.d/wsl-agent 2>/dev/nul
 
 curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap.sh -o /tmp/bootstrap.sh
 chmod +x /tmp/bootstrap.sh
-trap 'rm -f /tmp/bootstrap.sh' EXIT
 
 # sudo instead of sg: usermod -aG above doesn't take effect in this same session,
 # and sg isn't guaranteed present on minimal images - root always has docker access anyway
