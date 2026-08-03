@@ -80,6 +80,10 @@ if (-not (Test-Path $wslConfigPath) -or (Get-Content $wslConfigPath -Raw) -notma
 # dockerd/wsl-agent alive on an ongoing basis.
 schtasks.exe /create /tn "wsl-autostart" /tr "wsl.exe -d $Distro -- sleep infinity" /sc onstart /ru SYSTEM /rl highest /f
 
+# /create only registers it for future boots - run it once now too, so the
+# keep-alive is active for this session without needing an actual reboot.
+schtasks.exe /run /tn "wsl-autostart"
+
 $linuxSetup = @'
 set -euo pipefail
 
