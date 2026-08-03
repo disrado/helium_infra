@@ -18,6 +18,10 @@ DOCKER_GID="$(getent group docker | cut -d: -f3)"
 sudo mkdir -p /home/jenkins/agent
 sudo chown -R 1000:1000 /home/jenkins/agent
 
+# TEMP DIAGNOSTIC - remove once we find the container-name corruption bug
+echo "DIAG JENKINS_AGENT_NAME bytes:" >&2
+echo -n "$JENKINS_AGENT_NAME" | od -c >&2
+
 # safe to re-run: removes any leftover container from an interrupted prior attempt
 docker rm -f "$JENKINS_AGENT_NAME" 2>/dev/null || true
 
