@@ -22,6 +22,11 @@ param(
     [string]$Distro = "Ubuntu"
 )
 
+$JenkinsUrl = $JenkinsUrl.Trim()
+$AgentSecret = $AgentSecret.Trim()
+$AgentName = $AgentName.Trim()
+$Distro = $Distro.Trim()
+
 $missing = @()
 if (-not $JenkinsUrl) { $missing += "-JenkinsUrl" }
 if (-not $AgentSecret) { $missing += "-AgentSecret" }

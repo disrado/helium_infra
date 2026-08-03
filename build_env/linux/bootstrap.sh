@@ -5,6 +5,12 @@ JENKINS_URL="${1:?Usage: bootstrap.sh <jenkins-url> <agent-secret> <agent-name>}
 JENKINS_SECRET="${2:?}"
 JENKINS_AGENT_NAME="${3:?}"
 
+# defensive strip: a stray \r was observed reaching here through the PowerShell
+# wrapper's argument passing, breaking docker run --name's validation
+JENKINS_URL="$(echo -n "$JENKINS_URL" | tr -d '\r')"
+JENKINS_SECRET="$(echo -n "$JENKINS_SECRET" | tr -d '\r')"
+JENKINS_AGENT_NAME="$(echo -n "$JENKINS_AGENT_NAME" | tr -d '\r')"
+
 REPO_DIR="$HOME/helium_infra"
 [ -d "$REPO_DIR" ] || git clone https://github.com/disrado/helium_infra.git "$REPO_DIR"
 cd "$REPO_DIR/build_env/linux"
@@ -17,10 +23,6 @@ DOCKER_GID="$(getent group docker | cut -d: -f3)"
 
 sudo mkdir -p /home/jenkins/agent
 sudo chown -R 1000:1000 /home/jenkins/agent
-
-# TEMP DIAGNOSTIC - remove once we find the container-name corruption bug
-echo "DIAG JENKINS_AGENT_NAME bytes:" >&2
-echo -n "$JENKINS_AGENT_NAME" | od -c >&2
 
 # safe to re-run: removes any leftover container from an interrupted prior attempt
 docker rm -f "$JENKINS_AGENT_NAME" 2>/dev/null || true
