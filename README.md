@@ -2,10 +2,15 @@
 
 ## Setup new Linux agent
 
-Prerequisites: Docker running on the machine (WSL2 + `get.docker.com` if Windows host).
-
 1. Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `linux`, launch: inbound. Copy the secret.
-2. ```
+2. **Fresh Windows machine** (no WSL/Docker yet): run `bootstrap_linux_agent.ps1` from an elevated PowerShell —
+   handles WSL2 install, Docker, and everything else, then hands off to `bootstrap.sh` below.
+   ```powershell
+   irm https://raw.githubusercontent.com/disrado/helium_infra/main/bootstrap_linux_agent.ps1 -OutFile bootstrap_linux_agent.ps1
+   .\bootstrap_linux_agent.ps1 -JenkinsUrl <jenkins-url> -AgentSecret <agent-secret> -AgentName <agent-name>
+   ```
+   **Machine already has Docker running** (WSL2 or bare Linux): skip straight to the Linux-side script.
+   ```
    curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap.sh | bash -s -- <jenkins-url> <agent-secret> <agent-name>
    ```
 3. Check node shows connected in Jenkins.
