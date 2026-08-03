@@ -22,10 +22,10 @@ param(
     [string]$Distro = "Ubuntu"
 )
 
-$JenkinsUrl = $JenkinsUrl.Trim()
-$AgentSecret = $AgentSecret.Trim()
-$AgentName = $AgentName.Trim()
-$Distro = $Distro.Trim()
+if ($JenkinsUrl) { $JenkinsUrl = $JenkinsUrl.Trim() }
+if ($AgentSecret) { $AgentSecret = $AgentSecret.Trim() }
+if ($AgentName) { $AgentName = $AgentName.Trim() }
+if ($Distro) { $Distro = $Distro.Trim() }
 
 $missing = @()
 if (-not $JenkinsUrl) { $missing += "-JenkinsUrl" }
@@ -92,7 +92,7 @@ sudo grep -q '^systemd=true' /etc/wsl.conf 2>/dev/null || printf '[boot]\nsystem
 
 # clock-drift fix: systemd-timesyncd's ConditionVirtualization=!container trips
 # on WSL2 (treated as a container even though it's a lightweight VM)
-command -v systemd-timesyncd &>/dev/null || { sudo apt-get update -qq && sudo apt-get install -y systemd-timesyncd; }
+dpkg -s systemd-timesyncd &>/dev/null || { sudo apt-get update -qq && sudo apt-get install -y systemd-timesyncd; }
 sudo cp /usr/lib/systemd/system/systemd-timesyncd.service /etc/systemd/system/systemd-timesyncd.service
 sudo sed -i '/ConditionVirtualization/d' /etc/systemd/system/systemd-timesyncd.service
 sudo systemctl daemon-reload
