@@ -65,12 +65,12 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# vmIdleTimeout=-1 (outer VM) + instanceIdleTimeout=-1 (the distro instance itself,
-# which is what actually kills dockerd/wsl-agent ~15s after nothing is attached -
-# vmIdleTimeout alone doesn't cover this earlier stage).
+# vmIdleTimeout=-1: keeps the outer VM from suspending. Doesn't cover the distro
+# instance itself idling out ~15s after nothing is attached - that's handled by the
+# persistent sleep-infinity scheduled task below instead.
 $wslConfigPath = "$env:USERPROFILE\.wslconfig"
 if (-not (Test-Path $wslConfigPath) -or (Get-Content $wslConfigPath -Raw) -notmatch "vmIdleTimeout") {
-    Add-Content -Path $wslConfigPath -Value "`n[wsl2]`nvmIdleTimeout=-1`ninstanceIdleTimeout=-1`n"
+    Add-Content -Path $wslConfigPath -Value "`n[wsl2]`nvmIdleTimeout=-1`n"
     wsl --shutdown
 }
 
@@ -79,7 +79,7 @@ if (-not (Test-Path $wslConfigPath) -or (Get-Content $wslConfigPath -Raw) -notma
 # a permanently-attached session running, both recovering after reboot and keeping
 # dockerd/wsl-agent alive on an ongoing basis. Runs as the current user, not SYSTEM -
 # WSL distros are per-user, so SYSTEM can't see a distro registered under this account.
-schtasks.exe /create /tn "wsl-autostart" /tr "wsl.exe -d $Distro -- sleep infinity" /sc onstart /ru "$env:USERNAME" /rl highest /f
+schtasks.exe /create /tn "wsl-autostart" /tr "powershell.exe -WindowStyle Hidden -Command `"wsl -d $Distro -- sleep infinity`"" /sc onstart /ru "$env:USERNAME" /rl highest /f
 
 # /create only registers it for future boots - run it once now too, so the
 # keep-alive is active for this session without needing an actual reboot.
