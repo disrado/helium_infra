@@ -102,8 +102,9 @@ curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env
 chmod +x /tmp/bootstrap.sh
 trap 'rm -f /tmp/bootstrap.sh' EXIT
 
-# sg docker: usermod -aG above doesn't take effect in this same session otherwise
-sg docker -c "/tmp/bootstrap.sh '$1' '$2' '$3'"
+# sudo instead of sg: usermod -aG above doesn't take effect in this same session,
+# and sg isn't guaranteed present on minimal images - root always has docker access anyway
+sudo /tmp/bootstrap.sh "$1" "$2" "$3"
 '@
 
 $linuxSetup | wsl -d $Distro -- bash -s -- "$JenkinsUrl" "$AgentSecret" "$AgentName"
