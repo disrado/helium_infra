@@ -2,23 +2,36 @@
 
 ## Setup new Linux agent
 
+1. Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `linux`, launch: inbound.
+
+### Windows
+
 Requires virtualization enabled in BIOS/firmware (needed for WSL2/Hyper-V) - if disabled, `wsl --install` and the
 script's own reboot check will keep failing since it's a firmware setting, not something Windows/a reboot fixes.
 
-1. Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `linux`, launch: inbound. Copy the secret.
-2. **Fresh Windows machine** (no WSL/Docker yet): run `bootstrap_linux_agent.ps1` from an elevated PowerShell —
-   handles WSL2 install, Docker, and everything else, then hands off to `bootstrap.sh` below.
-   ```powershell
-   irm https://raw.githubusercontent.com/disrado/helium_infra/main/bootstrap_linux_agent.ps1 -OutFile bootstrap_linux_agent.ps1
-   ```
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File .\bootstrap_linux_agent.ps1 -JenkinsUrl <jenkins-url> -AgentSecret <agent-secret> -AgentName <agent-name>
-   ```
-   **Machine already has Docker running** (WSL2 or bare Linux): skip straight to the Linux-side script.
-   ```
-   curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap.sh | bash -s -- <jenkins-url> <agent-secret> <agent-name>
-   ```
-3. Check node shows connected in Jenkins.
+**Fresh machine** (elevated PowerShell):
+```powershell
+irm https://raw.githubusercontent.com/disrado/helium_infra/main/bootstrap_linux_agent.ps1 -OutFile bootstrap_linux_agent.ps1
+```
+```powershell
+powershell -ExecutionPolicy Bypass -File .\bootstrap_linux_agent.ps1 -JenkinsUrl <jenkins-url> -AgentSecret <agent-secret> -AgentName <agent-name>
+```
+Args: `-JenkinsUrl` Jenkins controller URL. `-AgentSecret` from the node's config page. `-AgentName` name for
+the Jenkins node/container. `-Distro` WSL distro name, defaults to `Ubuntu`.
+
+**WSL2 + Docker already set up** (run from inside WSL):
+```
+curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap.sh | bash -s -- <jenkins-url> <agent-secret> <agent-name>
+```
+
+### Linux
+
+**Docker already running**:
+```
+curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap.sh | bash -s -- <jenkins-url> <agent-secret> <agent-name>
+```
+
+2. Check node shows connected in Jenkins.
 
 ## Updating an existing agent's images
 
