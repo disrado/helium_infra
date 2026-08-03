@@ -51,8 +51,10 @@ if ($missing.Count -gt 0) {
 
 $ErrorActionPreference = "Stop"
 
-# Install the distro if it's not there yet
-if (-not (wsl -l -q 2>$null | Where-Object { $_ -match [regex]::Escape($Distro) })) {
+# Install the distro if it's not there yet. wsl.exe's piped stdout is UTF-16LE
+# (a null byte after every char), which silently breaks -match unless stripped.
+$installedDistros = (wsl -l -q 2>$null) -replace "`0", "" | Where-Object { $_.Trim() -ne "" }
+if ($installedDistros -notcontains $Distro) {
     wsl --install -d $Distro --no-launch
 }
 
@@ -63,17 +65,20 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# vmIdleTimeout=-1: WSL2 suspends when idle by default, which drops wsl-agent's
-# connection to Jenkins mid-build. Keep the VM running continuously instead.
+# vmIdleTimeout=-1 (outer VM) + instanceIdleTimeout=-1 (the distro instance itself,
+# which is what actually kills dockerd/wsl-agent ~15s after nothing is attached -
+# vmIdleTimeout alone doesn't cover this earlier stage).
 $wslConfigPath = "$env:USERPROFILE\.wslconfig"
 if (-not (Test-Path $wslConfigPath) -or (Get-Content $wslConfigPath -Raw) -notmatch "vmIdleTimeout") {
-    Add-Content -Path $wslConfigPath -Value "`n[wsl2]`nvmIdleTimeout=-1`n"
+    Add-Content -Path $wslConfigPath -Value "`n[wsl2]`nvmIdleTimeout=-1`ninstanceIdleTimeout=-1`n"
     wsl --shutdown
 }
 
-# WSL2 doesn't auto-start on Windows boot - this brings it (and thus dockerd,
-# and wsl-agent's --restart unless-stopped) back up after a real reboot.
-schtasks.exe /create /tn "wsl-autostart" /tr "wsl.exe -d $Distro -- true" /sc onstart /ru SYSTEM /rl highest /f
+# WSL2 doesn't auto-start on Windows boot, and (even with the idle-timeout config
+# above) a distro with nothing attached can still idle out. `sleep infinity` keeps
+# a permanently-attached session running, both recovering after reboot and keeping
+# dockerd/wsl-agent alive on an ongoing basis.
+schtasks.exe /create /tn "wsl-autostart" /tr "wsl.exe -d $Distro -- sleep infinity" /sc onstart /ru SYSTEM /rl highest /f
 
 $linuxSetup = @'
 set -euo pipefail
