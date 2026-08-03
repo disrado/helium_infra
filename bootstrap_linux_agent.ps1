@@ -102,3 +102,8 @@ sg docker -c "/tmp/bootstrap.sh '$1' '$2' '$3'"
 '@
 
 $linuxSetup | wsl -d $Distro -- bash -s -- "$JenkinsUrl" "$AgentSecret" "$AgentName"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Setup failed - see the error above." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
+Write-Host "Done - agent should now show connected in Jenkins." -ForegroundColor Green

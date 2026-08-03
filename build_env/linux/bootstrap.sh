@@ -27,3 +27,25 @@ docker run -d --name "$JENKINS_AGENT_NAME" --restart unless-stopped \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /home/jenkins/agent:/home/jenkins/agent \
   helium-linux-jenkins-agent:latest
+
+echo "Waiting for agent to connect..."
+CONNECTED=false
+for i in $(seq 1 15); do
+    if docker logs "$JENKINS_AGENT_NAME" 2>&1 | grep -q "INFO: Connected"; then
+        CONNECTED=true
+        break
+    fi
+    if docker logs "$JENKINS_AGENT_NAME" 2>&1 | grep -qiE "error|exception|refused"; then
+        break
+    fi
+    sleep 2
+done
+
+if [ "$CONNECTED" != "true" ]; then
+    echo "ERROR: agent did not connect to Jenkins. Recent logs:" >&2
+    docker logs --tail 20 "$JENKINS_AGENT_NAME" >&2
+    docker rm -f "$JENKINS_AGENT_NAME"
+    exit 1
+fi
+
+echo "Agent connected successfully."
