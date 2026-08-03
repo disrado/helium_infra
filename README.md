@@ -6,9 +6,7 @@ Prerequisites: Docker running on the machine (WSL2 + `get.docker.com` if Windows
 
 1. Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `linux`, launch: inbound. Copy the secret.
 2. ```
-   git clone https://github.com/disrado/helium_infra.git
-   cd helium_infra/build_env/linux
-   ./bootstrap.sh <jenkins-url> <agent-secret> <agent-name>
+   curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap.sh | bash -s -- <jenkins-url> <agent-secret> <agent-name>
    ```
 3. Check node shows connected in Jenkins.
 

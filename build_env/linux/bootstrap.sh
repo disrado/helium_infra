@@ -5,7 +5,10 @@ JENKINS_URL="${1:?Usage: bootstrap.sh <jenkins-url> <agent-secret> <agent-name>}
 JENKINS_SECRET="${2:?}"
 JENKINS_AGENT_NAME="${3:?}"
 
-cd "$(dirname "$0")"
+REPO_DIR="$HOME/helium_infra"
+[ -d "$REPO_DIR" ] || git clone https://github.com/disrado/helium_infra.git "$REPO_DIR"
+cd "$REPO_DIR/build_env/linux"
+
 docker build -t helium-linux-build-env:latest .
 
 docker build -t helium-linux-jenkins-agent:latest ../../jenkins_agent/linux
