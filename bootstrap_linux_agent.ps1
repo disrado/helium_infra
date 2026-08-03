@@ -84,9 +84,13 @@ sudo sed -i '/ConditionVirtualization/d' /etc/systemd/system/systemd-timesyncd.s
 sudo systemctl daemon-reload
 sudo systemctl enable --now systemd-timesyncd
 
-# native Docker Engine, not Docker Desktop
+# native Docker Engine, not Docker Desktop. Patch out get.docker.com's own
+# 20s WSL-detected sleep (it nags to use Docker Desktop instead) - no flag for this.
 if ! command -v docker &>/dev/null; then
-    curl -fsSL https://get.docker.com | sudo sh
+    curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+    sed -i 's/sleep 20/sleep 1/' /tmp/get-docker.sh
+    sudo sh /tmp/get-docker.sh
+    rm -f /tmp/get-docker.sh
     sudo usermod -aG docker "$USER"
 fi
 
