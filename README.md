@@ -2,6 +2,9 @@
 
 ## Setup new Linux agent
 
+Requires virtualization enabled in BIOS/firmware (needed for WSL2/Hyper-V) - if disabled, `wsl --install` and the
+script's own reboot check will keep failing since it's a firmware setting, not something Windows/a reboot fixes.
+
 1. Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `linux`, launch: inbound. Copy the secret.
 2. **Fresh Windows machine** (no WSL/Docker yet): run `bootstrap_linux_agent.ps1` from an elevated PowerShell —
    handles WSL2 install, Docker, and everything else, then hands off to `bootstrap.sh` below.
