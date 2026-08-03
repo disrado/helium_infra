@@ -7,7 +7,9 @@
    handles WSL2 install, Docker, and everything else, then hands off to `bootstrap.sh` below.
    ```powershell
    irm https://raw.githubusercontent.com/disrado/helium_infra/main/bootstrap_linux_agent.ps1 -OutFile bootstrap_linux_agent.ps1
-   .\bootstrap_linux_agent.ps1 -JenkinsUrl <jenkins-url> -AgentSecret <agent-secret> -AgentName <agent-name>
+   ```
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\bootstrap_linux_agent.ps1 -JenkinsUrl <jenkins-url> -AgentSecret <agent-secret> -AgentName <agent-name>
    ```
    **Machine already has Docker running** (WSL2 or bare Linux): skip straight to the Linux-side script.
    ```

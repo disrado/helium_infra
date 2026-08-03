@@ -22,8 +22,25 @@ param(
     [string]$Distro = "Ubuntu"
 )
 
-if (-not $JenkinsUrl -or -not $AgentSecret -or -not $AgentName) {
-    Get-Help $PSCommandPath -Detailed
+$missing = @()
+if (-not $JenkinsUrl) { $missing += "-JenkinsUrl" }
+if (-not $AgentSecret) { $missing += "-AgentSecret" }
+if (-not $AgentName) { $missing += "-AgentName" }
+
+if ($missing.Count -gt 0) {
+    Write-Host "Missing required parameter(s): $($missing -join ', ')" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "USAGE:"
+    Write-Host "  .\bootstrap_linux_agent.ps1 -JenkinsUrl <url> -AgentSecret <secret> -AgentName <name> [-Distro <distro>]"
+    Write-Host ""
+    Write-Host "PARAMETERS:"
+    Write-Host "  -JenkinsUrl    Jenkins controller URL, e.g. https://jenkins.example.com/"
+    Write-Host "  -AgentSecret   Agent connection secret from Jenkins' node config page."
+    Write-Host "  -AgentName     Name for the Jenkins node/container (e.g. wsl-agent)."
+    Write-Host "  -Distro        WSL distro name. Defaults to 'Ubuntu'."
+    Write-Host ""
+    Write-Host "EXAMPLE:"
+    Write-Host "  .\bootstrap_linux_agent.ps1 -JenkinsUrl https://jenkins.example.com/ -AgentSecret abc123 -AgentName wsl-agent"
     exit 1
 }
 
