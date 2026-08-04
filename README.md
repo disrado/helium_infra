@@ -8,7 +8,7 @@ Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `li
 
 ### 2. Run the bootstrap
 
-**Windows**
+#### Windows
 
 Requires virtualization enabled in BIOS/firmware (needed for WSL2/Hyper-V) - if disabled, `wsl --install` and the
 script's own reboot check will keep failing since it's a firmware setting, not something Windows/a reboot fixes.
@@ -26,7 +26,7 @@ Args:
 - `-AgentName` name for the Jenkins node/container.
 - `-Distro` WSL distro name, defaults to `Ubuntu`.
 
-**Linux**
+#### Linux
 
 Docker already running:
 ```
