@@ -1,4 +1,4 @@
-# helium_infra
+# helium project infrastructure
 
 ## Setup WSL agent
 
@@ -69,8 +69,17 @@ Don't re-run the bootstrap scripts. Run the `update_agent_env` Jenkins job inste
 
 ## Removing an agent
 
-Run on the machine itself (elevated PowerShell), not through Jenkins:
-- WSL: `build_env/linux/tear_down_wsl_agent.ps1`
-- Windows: `build_env/windows/tear_down_windows_agent.ps1`
+Run on the machine itself (elevated PowerShell), not through Jenkins. Leaves the Jenkins node itself in place -
+delete it manually in Jenkins after the script finishes.
 
-Both leave the Jenkins node itself in place - delete it manually in Jenkins after the script finishes.
+**WSL:**
+```powershell
+irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/tear_down_wsl_agent.ps1 -OutFile tear_down_wsl_agent.ps1
+powershell -ExecutionPolicy Bypass -File .\tear_down_wsl_agent.ps1
+```
+
+**Windows:**
+```powershell
+irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/windows/tear_down_windows_agent.ps1 -OutFile tear_down_windows_agent.ps1
+powershell -ExecutionPolicy Bypass -File .\tear_down_windows_agent.ps1
+```
