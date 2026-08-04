@@ -23,7 +23,7 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap_linux_agent.ps1 -JenkinsUrl
 Args:
 - `-JenkinsUrl` Jenkins controller URL.
 - `-AgentSecret` from the node's config page.
-- `-AgentName` name for the Jenkins node/container.
+- `-AgentName` Jenkins node name.
 
 #### Linux
 

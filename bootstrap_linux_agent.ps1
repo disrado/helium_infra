@@ -8,7 +8,7 @@ Jenkins controller URL, e.g. https://jenkins.example.com/
 .PARAMETER AgentSecret
 Agent connection secret from Jenkins' node config page.
 .PARAMETER AgentName
-Name for the Jenkins node/container (e.g. wsl-agent).
+Jenkins node name.
 .EXAMPLE
 .\bootstrap_linux_agent.ps1 -JenkinsUrl https://jenkins.example.com/ -AgentSecret abc123 -AgentName wsl-agent
 #>
@@ -39,7 +39,7 @@ if ($missing.Count -gt 0) {
     Write-Host "PARAMETERS:"
     Write-Host "  -JenkinsUrl    Jenkins controller URL, e.g. https://jenkins.example.com/"
     Write-Host "  -AgentSecret   Agent connection secret from Jenkins' node config page."
-    Write-Host "  -AgentName     Name for the Jenkins node/container (e.g. wsl-agent)."
+    Write-Host "  -AgentName     Jenkins node name."
     Write-Host ""
     Write-Host "EXAMPLE:"
     Write-Host "  .\bootstrap_linux_agent.ps1 -JenkinsUrl https://jenkins.example.com/ -AgentSecret abc123 -AgentName wsl-agent"
