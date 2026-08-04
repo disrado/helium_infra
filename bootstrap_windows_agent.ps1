@@ -110,13 +110,15 @@ foreach ($line in $vcvarsOutput) {
 $agentJarUrl = "$($JenkinsUrl.TrimEnd('/'))/jnlpJars/agent.jar"
 Invoke-WebRequest -Uri $agentJarUrl -OutFile "$Root\agent.jar"
 
-# No quotes below - every value here is space-free by design, avoids schtasks' nested-quote hazard.
+# No quotes below - every value here is space-free by design.
 $javaExe = "$Toolchain\java\bin\java.exe"
 $agentCmd = "$javaExe -jar $Root\agent.jar -url $JenkinsUrl -secret $AgentSecret -name $AgentName -workDir $Root\workDir"
-schtasks.exe /create /tn "windows-agent-autostart" /tr "powershell.exe -WindowStyle Hidden -Command $agentCmd" /sc onlogon /ru "$env:USERNAME" /rl highest /f
-schtasks.exe /run /tn "windows-agent-autostart"
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Setup failed - see the error above." -ForegroundColor Red
-    exit $LASTEXITCODE
-}
+
+# schtasks.exe's /tr has a 261-char cap that a long Jenkins secret/URL blows past -
+# Register-ScheduledTask builds the action via structured objects, no such limit.
+$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -Command `"$agentCmd`""
+$trigger = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERNAME"
+Register-ScheduledTask -TaskName "windows-agent-autostart" -Action $action -Trigger $trigger -User "$env:USERNAME" -RunLevel Highest -Force | Out-Null
+Start-ScheduledTask -TaskName "windows-agent-autostart"
+
 Write-Host "Done - agent should now show connected in Jenkins." -ForegroundColor Green
