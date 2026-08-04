@@ -4,14 +4,14 @@
 pipeline {
     agent none
     parameters {
-        choice(name: 'NODE_NAME', choices: ['wsl-agent', 'windows_agent'], description: 'Which machine to update')
+        choice(name: 'NODE_NAME', choices: ['wsl_agent', 'windows_agent'], description: 'Which machine to update')
     }
     stages {
         stage('Update') {
             agent { label params.NODE_NAME }
             steps {
                 script {
-                    if (params.NODE_NAME == 'wsl-agent') {
+                    if (params.NODE_NAME == 'wsl_agent') {
                         sh 'bash build_env/linux/build_images.sh'
                     } else {
                         bat 'powershell -ExecutionPolicy Bypass -File build_env/windows/bootstrap_toolchain.ps1'
