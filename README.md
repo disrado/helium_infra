@@ -4,7 +4,8 @@
 
 ### 1. Create the Jenkins node
 
-Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `linux`, launch: inbound.
+Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `linux`, launch: inbound, remote root
+directory `/home/jenkins/agent`.
 
 ### 2. Run the bootstrap
 
@@ -40,3 +41,30 @@ Check node shows connected in Jenkins.
 
 Don't re-run `bootstrap.sh`. Run the `setup_agent` Jenkins job instead — rebuilds images without touching the
 running container.
+
+## Setup new Windows agent
+
+Native (no containers) - installs the toolchain and registers the agent directly on the host.
+
+### 1. Create the Jenkins node
+
+Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `windows`, launch: inbound, remote root
+directory `C:\jenkins-agent\workDir`.
+
+### 2. Run the bootstrap
+
+Fresh machine (elevated PowerShell):
+```powershell
+irm https://raw.githubusercontent.com/disrado/helium_infra/main/bootstrap_windows_agent.ps1 -OutFile bootstrap_windows_agent.ps1
+```
+```powershell
+powershell -ExecutionPolicy Bypass -File .\bootstrap_windows_agent.ps1 -JenkinsUrl <jenkins-url> -AgentSecret <agent-secret> -AgentName <agent-name>
+```
+Args:
+- `-JenkinsUrl` Jenkins controller URL.
+- `-AgentSecret` from the node's config page.
+- `-AgentName` Jenkins node name.
+
+### 3. Verify
+
+Check node shows connected in Jenkins.
