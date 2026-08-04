@@ -5,8 +5,7 @@ JENKINS_URL="${1:?Usage: bootstrap.sh <jenkins-url> <agent-secret> <agent-name>}
 JENKINS_SECRET="${2:?}"
 JENKINS_AGENT_NAME="${3:?}"
 
-# defensive strip: a stray \r was observed reaching here through the PowerShell
-# wrapper's argument passing, breaking docker run --name's validation
+# defensive strip: a stray \r from the PowerShell wrapper broke docker run --name
 JENKINS_URL="$(echo -n "$JENKINS_URL" | tr -d '\r')"
 JENKINS_SECRET="$(echo -n "$JENKINS_SECRET" | tr -d '\r')"
 JENKINS_AGENT_NAME="$(echo -n "$JENKINS_AGENT_NAME" | tr -d '\r')"

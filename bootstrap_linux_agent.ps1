@@ -51,8 +51,7 @@ if ($missing.Count -gt 0) {
 
 $ErrorActionPreference = "Stop"
 
-# Install the distro if it's not there yet. wsl.exe's piped stdout is UTF-16LE
-# (a null byte after every char), which silently breaks -match unless stripped.
+# wsl.exe's piped output is UTF-16LE (null byte per char), strip before matching.
 $installedDistros = (wsl -l -q 2>$null) -replace "`0", "" | Where-Object { $_.Trim() -ne "" }
 if ($installedDistros -notcontains $Distro) {
     wsl --install -d $Distro --no-launch
@@ -65,28 +64,19 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# vmIdleTimeout=-1: keeps the outer VM from suspending. Doesn't cover the distro
-# instance itself idling out ~15s after nothing is attached - that's handled by the
-# persistent sleep-infinity scheduled task below instead.
+# Keeps the outer VM from suspending (the distro instance itself is handled below).
 $wslConfigPath = "$env:USERPROFILE\.wslconfig"
 if (-not (Test-Path $wslConfigPath) -or (Get-Content $wslConfigPath -Raw) -notmatch "vmIdleTimeout") {
     Add-Content -Path $wslConfigPath -Value "`n[wsl2]`nvmIdleTimeout=-1`n"
     wsl --shutdown
 }
 
-# WSL2 doesn't auto-start on Windows boot, and (even with the idle-timeout config
-# above) a distro with nothing attached can still idle out. `sleep infinity` keeps
-# a permanently-attached session running, both recovering after reboot and keeping
-# dockerd/wsl-agent alive on an ongoing basis. Runs as the current user, not SYSTEM -
-# WSL distros are per-user, so SYSTEM can't see a distro registered under this account.
-# onlogon (not onstart): without a stored password this only runs while the user is
-# logged on, and onstart's trigger fires once at boot then gives up if no session
-# exists yet - it doesn't retry once the user actually logs in. onlogon fires at the
-# moment that condition is actually met.
+# Keeps dockerd/wsl-agent alive across idling and reboots. Current user, not SYSTEM
+# (WSL distros are per-user). onlogon, not onstart - onstart fires once at boot and
+# won't retry once you actually log in.
 schtasks.exe /create /tn "wsl-autostart" /tr "powershell.exe -WindowStyle Hidden -Command wsl -d $Distro -- sleep infinity" /sc onlogon /ru "$env:USERNAME" /rl highest /f
 
-# /create only registers it for future boots - run it once now too, so the
-# keep-alive is active for this session without needing an actual reboot.
+# /create only takes effect next boot - run it once now too.
 schtasks.exe /run /tn "wsl-autostart"
 
 $linuxSetup = @'
@@ -95,16 +85,14 @@ set -euo pipefail
 # systemd (needed for dockerd, systemd-timesyncd)
 sudo grep -q '^systemd=true' /etc/wsl.conf 2>/dev/null || printf '[boot]\nsystemd=true\n' | sudo tee -a /etc/wsl.conf >/dev/null
 
-# clock-drift fix: systemd-timesyncd's ConditionVirtualization=!container trips
-# on WSL2 (treated as a container even though it's a lightweight VM)
+# clock-drift fix: systemd-timesyncd's ConditionVirtualization trips on WSL2
 dpkg -s systemd-timesyncd &>/dev/null || { sudo apt-get update -qq && sudo apt-get install -y systemd-timesyncd; }
 sudo cp /usr/lib/systemd/system/systemd-timesyncd.service /etc/systemd/system/systemd-timesyncd.service
 sudo sed -i '/ConditionVirtualization/d' /etc/systemd/system/systemd-timesyncd.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now systemd-timesyncd
 
-# native Docker Engine, not Docker Desktop. Patch out get.docker.com's own
-# 20s WSL-detected sleep (it nags to use Docker Desktop instead) - no flag for this.
+# native Docker Engine; patches out get.docker.com's WSL-detected nag sleep
 if ! command -v docker &>/dev/null; then
     curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
     sed -i 's/sleep 20/sleep 1/' /tmp/get-docker.sh
@@ -120,8 +108,7 @@ sudo grep -q "^$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers.d/wsl-agent 2>/dev/nul
 curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap.sh -o /tmp/bootstrap.sh
 chmod +x /tmp/bootstrap.sh
 
-# sudo instead of sg: usermod -aG above doesn't take effect in this same session,
-# and sg isn't guaranteed present on minimal images - root always has docker access anyway
+# sudo not sg: group change needs a new session anyway, and sg isn't always present
 sudo /tmp/bootstrap.sh "$1" "$2" "$3"
 '@
 
