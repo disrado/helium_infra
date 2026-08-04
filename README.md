@@ -1,6 +1,6 @@
 # helium_infra
 
-## Setup new WSL agent
+## Setup WSL agent
 
 ### 1. Create the Jenkins node
 
@@ -11,8 +11,7 @@ directory `/home/jenkins/agent`.
 
 #### Windows
 
-Requires virtualization enabled in BIOS/firmware (needed for WSL2/Hyper-V) - if disabled, `wsl --install` and the
-script's own reboot check will keep failing since it's a firmware setting, not something Windows/a reboot fixes.
+Requires virtualization enabled in BIOS/firmware
 
 Fresh machine (elevated PowerShell):
 ```powershell
@@ -66,8 +65,7 @@ Check node shows connected in Jenkins.
 
 ## Updating an existing agent's environment
 
-Don't re-run the bootstrap scripts. Run the `update_agent_env` Jenkins job instead (`PLATFORM` = `wsl` or
-`windows`) - rebuilds images or reinstalls the toolchain without touching the running agent.
+Don't re-run the bootstrap scripts. Run the `update_agent_env` Jenkins job instead - rebuilds images or reinstalls the toolchain without touching the running agent.
 
 ## Removing an agent
 
