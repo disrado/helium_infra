@@ -79,7 +79,11 @@ if (-not (Test-Path $wslConfigPath) -or (Get-Content $wslConfigPath -Raw) -notma
 # a permanently-attached session running, both recovering after reboot and keeping
 # dockerd/wsl-agent alive on an ongoing basis. Runs as the current user, not SYSTEM -
 # WSL distros are per-user, so SYSTEM can't see a distro registered under this account.
-schtasks.exe /create /tn "wsl-autostart" /tr "powershell.exe -WindowStyle Hidden -Command wsl -d $Distro -- sleep infinity" /sc onstart /ru "$env:USERNAME" /rl highest /f
+# onlogon (not onstart): without a stored password this only runs while the user is
+# logged on, and onstart's trigger fires once at boot then gives up if no session
+# exists yet - it doesn't retry once the user actually logs in. onlogon fires at the
+# moment that condition is actually met.
+schtasks.exe /create /tn "wsl-autostart" /tr "powershell.exe -WindowStyle Hidden -Command wsl -d $Distro -- sleep infinity" /sc onlogon /ru "$env:USERNAME" /rl highest /f
 
 # /create only registers it for future boots - run it once now too, so the
 # keep-alive is active for this session without needing an actual reboot.
