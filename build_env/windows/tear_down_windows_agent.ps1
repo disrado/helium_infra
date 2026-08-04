@@ -23,9 +23,22 @@ Unregister-ScheduledTask -TaskName "windows-agent-autostart" -Confirm:$false -Er
 Get-Process java -ErrorAction SilentlyContinue | Stop-Process -Force
 
 foreach ($pkg in $ToolchainPackages) {
-    winget uninstall --exact --id $pkg.Id --silent --accept-source-agreements 2>$null
+    if ($pkg.Id -eq "LLVM.LLVM") {
+        # LLVM's winget manifest doesn't map --silent to a real uninstaller flag - falls back to its GUI.
+        $llvmUninstaller = "$Root\toolchain\$($pkg.Folder)\Uninstall.exe"
+        if (Test-Path $llvmUninstaller) { & $llvmUninstaller /S | Out-Null }
+    } else {
+        winget uninstall --exact --id $pkg.Id --silent --accept-source-agreements 2>$null
+    }
 }
-winget uninstall --exact --id $VsBuildToolsId --silent --accept-source-agreements 2>$null
+
+# Same winget-silent gap as LLVM - call the VS Installer CLI directly instead.
+$vsInstaller = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+if (Test-Path $vsInstaller) {
+    & $vsInstaller uninstall --installPath "$Root\toolchain\vs-buildtools" --quiet --wait --norestart
+} else {
+    winget uninstall --exact --id $VsBuildToolsId --silent --accept-source-agreements 2>$null
+}
 
 Remove-MpPreference -ExclusionPath $Root -ErrorAction SilentlyContinue
 
