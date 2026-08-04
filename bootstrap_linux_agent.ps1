@@ -9,8 +9,6 @@ Jenkins controller URL, e.g. https://jenkins.example.com/
 Agent connection secret from Jenkins' node config page.
 .PARAMETER AgentName
 Name for the Jenkins node/container (e.g. wsl-agent).
-.PARAMETER Distro
-WSL distro name. Defaults to "Ubuntu".
 .EXAMPLE
 .\bootstrap_linux_agent.ps1 -JenkinsUrl https://jenkins.example.com/ -AgentSecret abc123 -AgentName wsl-agent
 #>
@@ -18,14 +16,14 @@ WSL distro name. Defaults to "Ubuntu".
 param(
     [string]$JenkinsUrl,
     [string]$AgentSecret,
-    [string]$AgentName,
-    [string]$Distro = "Ubuntu"
+    [string]$AgentName
 )
+
+$Distro = "Ubuntu"
 
 if ($JenkinsUrl) { $JenkinsUrl = $JenkinsUrl.Trim() }
 if ($AgentSecret) { $AgentSecret = $AgentSecret.Trim() }
 if ($AgentName) { $AgentName = $AgentName.Trim() }
-if ($Distro) { $Distro = $Distro.Trim() }
 
 $missing = @()
 if (-not $JenkinsUrl) { $missing += "-JenkinsUrl" }
@@ -36,13 +34,12 @@ if ($missing.Count -gt 0) {
     Write-Host "Missing required parameter(s): $($missing -join ', ')" -ForegroundColor Red
     Write-Host ""
     Write-Host "USAGE:"
-    Write-Host "  .\bootstrap_linux_agent.ps1 -JenkinsUrl <url> -AgentSecret <secret> -AgentName <name> [-Distro <distro>]"
+    Write-Host "  .\bootstrap_linux_agent.ps1 -JenkinsUrl <url> -AgentSecret <secret> -AgentName <name>"
     Write-Host ""
     Write-Host "PARAMETERS:"
     Write-Host "  -JenkinsUrl    Jenkins controller URL, e.g. https://jenkins.example.com/"
     Write-Host "  -AgentSecret   Agent connection secret from Jenkins' node config page."
     Write-Host "  -AgentName     Name for the Jenkins node/container (e.g. wsl-agent)."
-    Write-Host "  -Distro        WSL distro name. Defaults to 'Ubuntu'."
     Write-Host ""
     Write-Host "EXAMPLE:"
     Write-Host "  .\bootstrap_linux_agent.ps1 -JenkinsUrl https://jenkins.example.com/ -AgentSecret abc123 -AgentName wsl-agent"

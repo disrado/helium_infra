@@ -24,7 +24,6 @@ Args:
 - `-JenkinsUrl` Jenkins controller URL.
 - `-AgentSecret` from the node's config page.
 - `-AgentName` name for the Jenkins node/container.
-- `-Distro` WSL distro name, defaults to `Ubuntu`.
 
 #### Linux
 
