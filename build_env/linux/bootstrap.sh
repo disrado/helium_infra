@@ -14,9 +14,7 @@ REPO_DIR="$HOME/helium_infra"
 [ -d "$REPO_DIR" ] || git clone https://github.com/disrado/helium_infra.git "$REPO_DIR"
 cd "$REPO_DIR/build_env/linux"
 
-docker build -t helium-linux-build-env:latest .
-
-docker build -t helium-linux-jenkins-agent:latest ../../jenkins_agent/linux
+bash build_images.sh
 
 DOCKER_GID="$(getent group docker | cut -d: -f3)"
 

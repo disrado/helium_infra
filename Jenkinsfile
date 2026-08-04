@@ -1,19 +1,23 @@
-// setup_agent job: rebuilds the build-env and agent images on an already-registered agent
+// update_agent_env job: updates the chosen platform's agent environment (Docker images on WSL, toolchain on
+// Windows) - never touches the running container/registration.
 pipeline {
-    agent { label 'linux' }
-    stages {
-        stage('Build build-env image') {
-            steps {
-                sh 'docker build -t helium-linux-build-env:latest build_env/linux'
-            }
-        }
-        stage('Build agent image') {
-            steps {
-                sh 'docker build -t helium-linux-jenkins-agent:latest jenkins_agent/linux'
-            }
-        }
+    agent none
+    parameters {
+        choice(name: 'PLATFORM', choices: ['wsl', 'windows'], description: 'Which agent to update')
     }
-    post {
-        always { cleanWs() }
+    stages {
+        stage('Update') {
+            agent { label params.PLATFORM }
+            steps {
+                script {
+                    if (params.PLATFORM == 'wsl') {
+                        sh 'bash build_env/linux/build_images.sh'
+                    } else {
+                        bat 'powershell -ExecutionPolicy Bypass -File bootstrap_windows_toolchain.ps1'
+                    }
+                }
+            }
+            post { always { cleanWs() } }
+        }
     }
 }

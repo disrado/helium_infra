@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-Sets up a Linux Jenkins agent (WSL2 + Docker) on a Windows machine.
+Sets up a WSL Jenkins agent (WSL2 + Docker) on a Windows machine.
 .PARAMETER JenkinsUrl
 Jenkins controller URL, e.g. https://jenkins.example.com/
 .PARAMETER AgentSecret
@@ -10,7 +10,7 @@ Agent connection secret from Jenkins' node config page.
 .PARAMETER AgentName
 Jenkins node name.
 .EXAMPLE
-.\bootstrap_linux_agent.ps1 -JenkinsUrl https://jenkins.example.com/ -AgentSecret abc123 -AgentName wsl-agent
+.\bootstrap_wsl_agent.ps1 -JenkinsUrl https://jenkins.example.com/ -AgentSecret abc123 -AgentName wsl-agent
 #>
 
 param(
@@ -34,7 +34,7 @@ if ($missing.Count -gt 0) {
     Write-Host "Missing required parameter(s): $($missing -join ', ')" -ForegroundColor Red
     Write-Host ""
     Write-Host "USAGE:"
-    Write-Host "  .\bootstrap_linux_agent.ps1 -JenkinsUrl <url> -AgentSecret <secret> -AgentName <name>"
+    Write-Host "  .\bootstrap_wsl_agent.ps1 -JenkinsUrl <url> -AgentSecret <secret> -AgentName <name>"
     Write-Host ""
     Write-Host "PARAMETERS:"
     Write-Host "  -JenkinsUrl    Jenkins controller URL, e.g. https://jenkins.example.com/"
@@ -42,7 +42,7 @@ if ($missing.Count -gt 0) {
     Write-Host "  -AgentName     Jenkins node name."
     Write-Host ""
     Write-Host "EXAMPLE:"
-    Write-Host "  .\bootstrap_linux_agent.ps1 -JenkinsUrl https://jenkins.example.com/ -AgentSecret abc123 -AgentName wsl-agent"
+    Write-Host "  .\bootstrap_wsl_agent.ps1 -JenkinsUrl https://jenkins.example.com/ -AgentSecret abc123 -AgentName wsl-agent"
     exit 1
 }
 
