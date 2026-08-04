@@ -49,7 +49,7 @@ $ErrorActionPreference = "Stop"
 # Single root: everything bootstrap brings to the machine lives here, for easy teardown later.
 $Root = "C:\jenkins-agent"
 $Toolchain = "$Root\toolchain"
-New-Item -ItemType Directory -Force -Path @($Root, $Toolchain, "$Root\vcpkg\cache", "$Root\workDir") | Out-Null
+New-Item -ItemType Directory -Force -Path @($Root, $Toolchain, "$Root\workDir") | Out-Null
 
 # vcpkg builds from source (thousands of small files) - real-time scanning tanks build times.
 Add-MpPreference -ExclusionPath $Root
@@ -88,7 +88,9 @@ $env:Path = $machinePath  # this session needs it too, for vcpkg/vcvarsall below
 
 if (-not (Test-Path "$Root\vcpkg\.git")) {
     git clone https://github.com/microsoft/vcpkg "$Root\vcpkg"
+    if ($LASTEXITCODE -ne 0) { throw "git clone of vcpkg failed (exit $LASTEXITCODE)" }
 }
+New-Item -ItemType Directory -Force -Path "$Root\vcpkg\cache" | Out-Null
 & "$Root\vcpkg\bootstrap-vcpkg.bat" -disableMetrics
 [Environment]::SetEnvironmentVariable("VCPKG_ROOT", "$Root\vcpkg", "Machine")
 [Environment]::SetEnvironmentVariable("VCPKG_DEFAULT_BINARY_CACHE", "$Root\vcpkg\cache", "Machine")
