@@ -26,11 +26,6 @@ Args:
 - `-AgentName` name for the Jenkins node/container.
 - `-Distro` WSL distro name, defaults to `Ubuntu`.
 
-WSL2 + Docker already set up (run from inside WSL):
-```
-curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap.sh | bash -s -- <jenkins-url> <agent-secret> <agent-name>
-```
-
 **Linux**
 
 Docker already running:
