@@ -86,6 +86,9 @@ foreach ($p in @("$Toolchain\git\cmd", "$Toolchain\cmake\bin", "$Toolchain\ninja
 [Environment]::SetEnvironmentVariable("Path", $machinePath, "Machine")
 $env:Path = $machinePath  # this session needs it too, for vcpkg/vcvarsall below
 
+if ((Test-Path "$Root\vcpkg") -and -not (Test-Path "$Root\vcpkg\.git")) {
+    Remove-Item -Recurse -Force "$Root\vcpkg"
+}
 if (-not (Test-Path "$Root\vcpkg\.git")) {
     git clone https://github.com/microsoft/vcpkg "$Root\vcpkg"
     if ($LASTEXITCODE -ne 0) { throw "git clone of vcpkg failed (exit $LASTEXITCODE)" }
