@@ -32,6 +32,15 @@ foreach ($pkg in $ToolchainPackages) {
     Install-Tool -Id $pkg.Id -Version $pkg.Version -Location "$Toolchain\$($pkg.Folder)" -Marker "$Toolchain\$($pkg.Folder)\$($pkg.Marker)"
 }
 
+$ninjaExe = "$Toolchain\$NinjaFolder\ninja.exe"
+if (-not (Test-Path $ninjaExe)) {
+    New-Item -ItemType Directory -Force -Path "$Toolchain\$NinjaFolder" | Out-Null
+    $ninjaZip = "$env:TEMP\ninja.zip"
+    Invoke-WebRequest -Uri "https://github.com/ninja-build/ninja/releases/download/v$NinjaVersion/ninja-win.zip" -OutFile $ninjaZip
+    Expand-Archive -Path $ninjaZip -DestinationPath "$Toolchain\$NinjaFolder" -Force
+    Remove-Item $ninjaZip -Force
+}
+
 # Standalone LLVM above is the compiler - only need the SDK + linker here.
 $vcvarsall = "$Toolchain\vs-buildtools\VC\Auxiliary\Build\vcvarsall.bat"
 $vsInstalled = winget list --exact --id $VsBuildToolsId --accept-source-agreements 2>$null
@@ -45,7 +54,7 @@ if (-not ((Test-Path $vcvarsall) -and ($vsInstalled -match [regex]::Escape($VsBu
 }
 
 $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
-foreach ($p in @("$Toolchain\git\cmd", "$Toolchain\cmake\bin", "$Toolchain\ninja", "$Toolchain\llvm\bin", "$Toolchain\java\bin")) {
+foreach ($p in @("$Toolchain\git\cmd", "$Toolchain\cmake\bin", "$Toolchain\$NinjaFolder", "$Toolchain\llvm\bin", "$Toolchain\java\bin")) {
     if ($machinePath -notlike "*$p*") { $machinePath = "$machinePath;$p" }
 }
 [Environment]::SetEnvironmentVariable("Path", $machinePath, "Machine")

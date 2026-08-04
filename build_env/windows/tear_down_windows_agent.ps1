@@ -43,10 +43,10 @@ if (Test-Path $vsInstaller) {
 Remove-MpPreference -ExclusionPath $Root -ErrorAction SilentlyContinue
 
 $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
-$toolchainPaths = $ToolchainPackages | ForEach-Object {
+$toolchainPaths = @("$Root\toolchain\$NinjaFolder") + ($ToolchainPackages | ForEach-Object {
     $dir = Split-Path $_.Marker -Parent
     if ($dir) { "$Root\toolchain\$($_.Folder)\$dir" } else { "$Root\toolchain\$($_.Folder)" }
-}
+})
 $machinePath = ($machinePath -split ';' | Where-Object { $toolchainPaths -notcontains $_ }) -join ';'
 [Environment]::SetEnvironmentVariable("Path", $machinePath, "Machine")
 
