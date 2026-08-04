@@ -1,10 +1,10 @@
 # helium_infra
 
-## Setup new Linux agent
+## Setup new WSL agent
 
 ### 1. Create the Jenkins node
 
-Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `linux`, launch: inbound, remote root
+Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `wsl`, launch: inbound, remote root
 directory `/home/jenkins/agent`.
 
 ### 2. Run the bootstrap
@@ -16,10 +16,10 @@ script's own reboot check will keep failing since it's a firmware setting, not s
 
 Fresh machine (elevated PowerShell):
 ```powershell
-irm https://raw.githubusercontent.com/disrado/helium_infra/main/bootstrap_linux_agent.ps1 -OutFile bootstrap_linux_agent.ps1
+irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap_wsl_agent.ps1 -OutFile bootstrap_wsl_agent.ps1
 ```
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\bootstrap_linux_agent.ps1 -JenkinsUrl <jenkins-url> -AgentSecret <agent-secret> -AgentName <agent-name>
+powershell -ExecutionPolicy Bypass -File .\bootstrap_wsl_agent.ps1 -JenkinsUrl <jenkins-url> -AgentSecret <agent-secret> -AgentName <agent-name>
 ```
 Args:
 - `-JenkinsUrl` Jenkins controller URL.
@@ -37,11 +37,6 @@ curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env
 
 Check node shows connected in Jenkins.
 
-## Updating an existing agent's images
-
-Don't re-run `bootstrap.sh`. Run the `setup_agent` Jenkins job instead — rebuilds images without touching the
-running container.
-
 ## Setup new Windows agent
 
 Native (no containers) - installs the toolchain and registers the agent directly on the host.
@@ -55,7 +50,7 @@ directory `C:\jenkins-agent\workDir`.
 
 Fresh machine (elevated PowerShell):
 ```powershell
-irm https://raw.githubusercontent.com/disrado/helium_infra/main/bootstrap_windows_agent.ps1 -OutFile bootstrap_windows_agent.ps1
+irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/windows/bootstrap_windows_agent.ps1 -OutFile bootstrap_windows_agent.ps1
 ```
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\bootstrap_windows_agent.ps1 -JenkinsUrl <jenkins-url> -AgentSecret <agent-secret> -AgentName <agent-name>
@@ -68,3 +63,16 @@ Args:
 ### 3. Verify
 
 Check node shows connected in Jenkins.
+
+## Updating an existing agent's environment
+
+Don't re-run the bootstrap scripts. Run the `update_agent_env` Jenkins job instead (`PLATFORM` = `wsl` or
+`windows`) - rebuilds images or reinstalls the toolchain without touching the running agent.
+
+## Removing an agent
+
+Run on the machine itself (elevated PowerShell), not through Jenkins:
+- WSL: `build_env/linux/tear_down_wsl_agent.ps1`
+- Windows: `build_env/windows/tear_down_windows_agent.ps1`
+
+Both leave the Jenkins node itself in place - delete it manually in Jenkins after the script finishes.
