@@ -10,7 +10,13 @@ Tears down the native Windows Jenkins agent - removes the toolchain and schedule
 $ErrorActionPreference = "Stop"
 $Root = "C:\jenkins-agent"
 
-. "$PSScriptRoot\toolchain_packages.ps1"
+$packagesScript = "$PSScriptRoot\toolchain_packages.ps1"
+$fetchedPackagesScript = -not (Test-Path $packagesScript)
+if ($fetchedPackagesScript) {
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/windows/toolchain_packages.ps1" -OutFile $packagesScript
+}
+. $packagesScript
+if ($fetchedPackagesScript) { Remove-Item $packagesScript -Force }
 
 Unregister-ScheduledTask -TaskName "windows-agent-autostart" -Confirm:$false -ErrorAction SilentlyContinue
 

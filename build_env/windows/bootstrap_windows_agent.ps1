@@ -48,7 +48,13 @@ $ErrorActionPreference = "Stop"
 
 $Root = "C:\jenkins-agent"
 
-. "$PSScriptRoot\bootstrap_toolchain.ps1"
+$toolchainScript = "$PSScriptRoot\bootstrap_toolchain.ps1"
+$fetchedToolchainScript = -not (Test-Path $toolchainScript)
+if ($fetchedToolchainScript) {
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/windows/bootstrap_toolchain.ps1" -OutFile $toolchainScript
+}
+. $toolchainScript
+if ($fetchedToolchainScript) { Remove-Item $toolchainScript -Force }
 
 New-Item -ItemType Directory -Force -Path "$Root\workDir" | Out-Null
 
