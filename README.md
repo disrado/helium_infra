@@ -75,11 +75,15 @@ delete it manually in Jenkins after the script finishes.
 **WSL:**
 ```powershell
 irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/tear_down_wsl_agent.ps1 -OutFile tear_down_wsl_agent.ps1
+```
+```powershell
 powershell -ExecutionPolicy Bypass -File .\tear_down_wsl_agent.ps1
 ```
 
 **Windows:**
 ```powershell
 irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/windows/tear_down_windows_agent.ps1 -OutFile tear_down_windows_agent.ps1
+```
+```powershell
 powershell -ExecutionPolicy Bypass -File .\tear_down_windows_agent.ps1
 ```
