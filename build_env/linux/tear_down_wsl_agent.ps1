@@ -14,4 +14,9 @@ schtasks.exe /delete /tn "wsl-autostart" /f
 
 wsl --unregister $Distro
 
+$wslConfigPath = "$env:USERPROFILE\.wslconfig"
+if (Test-Path $wslConfigPath) {
+    (Get-Content $wslConfigPath) | Where-Object { $_ -notmatch "vmIdleTimeout" } | Set-Content $wslConfigPath
+}
+
 Write-Host "WSL agent torn down." -ForegroundColor Green
