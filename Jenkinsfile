@@ -13,7 +13,7 @@ pipeline {
                     if (params.PLATFORM == 'wsl') {
                         sh 'bash build_env/linux/build_images.sh'
                     } else {
-                        bat 'powershell -ExecutionPolicy Bypass -File bootstrap_windows_toolchain.ps1'
+                        bat 'powershell -ExecutionPolicy Bypass -File build_env/windows/bootstrap_toolchain.ps1'
                     }
                 }
             }

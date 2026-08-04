@@ -48,7 +48,7 @@ $ErrorActionPreference = "Stop"
 
 $Root = "C:\jenkins-agent"
 
-. "$PSScriptRoot\bootstrap_windows_toolchain.ps1"
+. "$PSScriptRoot\bootstrap_toolchain.ps1"
 
 New-Item -ItemType Directory -Force -Path "$Root\workDir" | Out-Null
 
