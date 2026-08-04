@@ -112,7 +112,7 @@ Invoke-WebRequest -Uri $agentJarUrl -OutFile "$Root\agent.jar"
 
 # No quotes below - every value here is space-free by design.
 $javaExe = "$Toolchain\java\bin\java.exe"
-$agentCmd = "$javaExe -jar $Root\agent.jar -url $JenkinsUrl -secret $AgentSecret -name $AgentName -workDir $Root\workDir"
+$agentCmd = "$javaExe -jar $Root\agent.jar -url $JenkinsUrl -secret $AgentSecret -name $AgentName -workDir $Root\workDir -webSocket"
 
 # schtasks.exe's /tr has a 261-char cap that a long Jenkins secret/URL blows past -
 # Register-ScheduledTask builds the action via structured objects, no such limit.
