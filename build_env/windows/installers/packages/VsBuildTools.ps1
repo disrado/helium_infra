@@ -23,7 +23,9 @@ function Uninstall-VsBuildTools
     $location = "$Root\toolchain\vs-buildtools"
     $vsInstaller = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
     if (Test-Path $vsInstaller) {
-        & $vsInstaller uninstall --installPath $location --quiet --wait --norestart
+        # uninstall rejects --wait/--norestart (install/modify-only flags) with ERROR_INVALID_PARAMETER.
+        $p = Start-Process -FilePath $vsInstaller -ArgumentList @("uninstall", "--installPath", $location, "--quiet") -Wait -PassThru -NoNewWindow
+        if ($p.ExitCode -ne 0) { throw "VS Build Tools uninstall failed (exit $($p.ExitCode))" }
     } else {
         winget uninstall --exact --id "Microsoft.VisualStudio.2022.BuildTools" --silent --accept-source-agreements 2>$null
     }
