@@ -7,7 +7,8 @@ function Add-ToMachinePath
         $machinePath = "$machinePath;$binPath"
         [Environment]::SetEnvironmentVariable("Path", $machinePath, "Machine")
     }
-    $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine")  # this session needs it too - vcpkg needs git visible right after Git installs
+    # this session needs it too - vcpkg needs git visible right after Git installs. Merge, don't overwrite - User PATH holds winget's WindowsApps alias.
+    $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
 }
 
 function Remove-FromMachinePath
