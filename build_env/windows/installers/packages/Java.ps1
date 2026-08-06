@@ -11,3 +11,9 @@ function Uninstall-Java
     param($Root)
     Uninstall-WingetTool -Id "EclipseAdoptium.Temurin.21.JRE" -Marker "$Root\toolchain\java\bin\java.exe"
 }
+
+function Assert-JavaInstalled
+{
+    param($Root)
+    if (-not (Test-Path "$Root\toolchain\java\bin\java.exe")) { throw "Java install reported success but java.exe still doesn't exist" }
+}

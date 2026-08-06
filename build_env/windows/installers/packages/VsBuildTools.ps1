@@ -28,3 +28,12 @@ function Uninstall-VsBuildTools
         winget uninstall --exact --id "Microsoft.VisualStudio.2022.BuildTools" --silent --accept-source-agreements 2>$null
     }
 }
+
+function Assert-VsBuildToolsInstalled
+{
+    param($Root)
+    $marker = "$Root\toolchain\vs-buildtools\VC\Auxiliary\Build\vcvarsall.bat"
+    if (-not (Test-Path $marker)) {
+        throw "VS Build Tools install reported success but vcvarsall.bat still doesn't exist - possible winget tracking desync"
+    }
+}

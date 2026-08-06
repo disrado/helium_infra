@@ -23,3 +23,9 @@ function Uninstall-Vcpkg
     [Environment]::SetEnvironmentVariable("VCPKG_DEFAULT_BINARY_CACHE", $null, "Machine")
     Remove-Item -Recurse -Force "$Root\vcpkg" -ErrorAction SilentlyContinue
 }
+
+function Assert-VcpkgInstalled
+{
+    param($Root)
+    if (-not (Test-Path "$Root\vcpkg\vcpkg.exe")) { throw "vcpkg bootstrap ran but vcpkg.exe wasn't produced" }
+}

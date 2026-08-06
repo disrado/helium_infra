@@ -11,3 +11,9 @@ function Uninstall-CMake
     param($Root)
     Uninstall-WingetTool -Id "Kitware.CMake" -Marker "$Root\toolchain\cmake\bin\cmake.exe"
 }
+
+function Assert-CMakeInstalled
+{
+    param($Root)
+    if (-not (Test-Path "$Root\toolchain\cmake\bin\cmake.exe")) { throw "CMake install reported success but cmake.exe still doesn't exist" }
+}

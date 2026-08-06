@@ -29,7 +29,10 @@ New-Item -ItemType Directory -Force -Path @($Root, "$Root\toolchain") | Out-Null
 # vcpkg builds from source - real-time antivirus scanning tanks build times.
 Add-MpPreference -ExclusionPath $Root
 
-foreach ($name in $Packages) { & "Install-$name" -Root $Root }
+foreach ($name in $Packages) {
+    & "Install-$name" -Root $Root
+    & "Assert-${name}Installed" -Root $Root
+}
 
 # clang++ still needs vcvarsall's env vars - the onlogon session isn't a Developer Command Prompt.
 $vcvarsall = "$Root\toolchain\vs-buildtools\VC\Auxiliary\Build\vcvarsall.bat"

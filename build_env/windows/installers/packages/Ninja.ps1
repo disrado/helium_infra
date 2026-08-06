@@ -11,3 +11,9 @@ function Uninstall-Ninja
     param($Root)
     Uninstall-StaticExe -Location "$Root\toolchain\ninja" -Marker "$Root\toolchain\ninja\ninja.exe"
 }
+
+function Assert-NinjaInstalled
+{
+    param($Root)
+    if (-not (Test-Path "$Root\toolchain\ninja\ninja.exe")) { throw "Ninja install reported success but ninja.exe still doesn't exist" }
+}
