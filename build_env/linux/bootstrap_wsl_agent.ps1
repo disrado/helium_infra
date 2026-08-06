@@ -63,8 +63,15 @@ if ($LASTEXITCODE -ne 0) {
 
 # Keeps the outer VM from suspending (the distro instance itself is handled below).
 $wslConfigPath = "$env:USERPROFILE\.wslconfig"
-if (-not (Test-Path $wslConfigPath) -or (Get-Content $wslConfigPath -Raw) -notmatch "vmIdleTimeout") {
-    Add-Content -Path $wslConfigPath -Value "`n[wsl2]`nvmIdleTimeout=-1`n"
+$wslConfig = if (Test-Path $wslConfigPath) { Get-Content $wslConfigPath -Raw } else { "" }
+if ($wslConfig -notmatch "vmIdleTimeout") {
+    if ($wslConfig -match "(?m)^\[wsl2\]\s*$") {
+        # teardown strips the key but not the header - reuse it instead of duplicating.
+        $wslConfig = $wslConfig -replace "(?m)^\[wsl2\]\s*$", "[wsl2]`nvmIdleTimeout=-1"
+    } else {
+        $wslConfig += "`n[wsl2]`nvmIdleTimeout=-1`n"
+    }
+    Set-Content -Path $wslConfigPath -Value $wslConfig
     wsl --shutdown
 }
 
