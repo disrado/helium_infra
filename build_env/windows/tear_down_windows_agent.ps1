@@ -25,9 +25,16 @@ foreach ($name in $Packages) { . "$sourceRoot\installers\packages\$name.ps1" }
 
 Unregister-ScheduledTask -TaskName "windows-agent-autostart" -Confirm:$false -ErrorAction SilentlyContinue
 
-Get-Process java -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process java -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 
-foreach ($name in $Packages) { & "Uninstall-$name" -Root $Root }
+# best-effort: a package that failed mid-bootstrap shouldn't block cleanup of the rest.
+foreach ($name in $Packages) {
+    try {
+        & "Uninstall-$name" -Root $Root
+    } catch {
+        Write-Warning "Uninstall-$name failed, continuing: $_"
+    }
+}
 
 Remove-MpPreference -ExclusionPath $Root -ErrorAction SilentlyContinue
 
@@ -37,6 +44,6 @@ foreach ($var in @("INCLUDE", "LIB", "LIBPATH")) {
 
 Remove-Item -Recurse -Force $Root -ErrorAction SilentlyContinue
 
-if ($tempZip) { Remove-Item $tempZip, $tempExtract -Recurse -Force }
+if ($tempZip) { Remove-Item $tempZip, $tempExtract -Recurse -Force -ErrorAction SilentlyContinue }
 
 Write-Host "Windows agent torn down." -ForegroundColor Green

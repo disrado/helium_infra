@@ -10,13 +10,17 @@ Tears down the WSL Jenkins agent - unregisters the distro and removes bootstrap 
 $ErrorActionPreference = "Stop"
 $Distro = "Ubuntu"
 
-schtasks.exe /delete /tn "wsl-autostart" /f
+try { schtasks.exe /delete /tn "wsl-autostart" /f } catch { Write-Warning "scheduled task removal failed, continuing: $_" }
 
-wsl --unregister $Distro
+try { wsl --unregister $Distro } catch { Write-Warning "wsl unregister failed, continuing: $_" }
 
-$wslConfigPath = "$env:USERPROFILE\.wslconfig"
-if (Test-Path $wslConfigPath) {
-    (Get-Content $wslConfigPath) | Where-Object { $_ -notmatch "vmIdleTimeout" } | Set-Content $wslConfigPath
+try {
+    $wslConfigPath = "$env:USERPROFILE\.wslconfig"
+    if (Test-Path $wslConfigPath) {
+        (Get-Content $wslConfigPath) | Where-Object { $_ -notmatch "vmIdleTimeout" } | Set-Content $wslConfigPath
+    }
+} catch {
+    Write-Warning ".wslconfig cleanup failed, continuing: $_"
 }
 
 Write-Host "WSL agent torn down." -ForegroundColor Green
