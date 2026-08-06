@@ -11,28 +11,18 @@ $ErrorActionPreference = "Stop"
 
 $Root = "C:\jenkins-agent"
 
-$packagesScript = "$PSScriptRoot\toolchain_packages.ps1"
-$fetchedFiles = @()
-if (-not (Test-Path $packagesScript)) {
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/windows/toolchain_packages.ps1" -OutFile $packagesScript
-    $fetchedFiles += $packagesScript
+$sourceRoot = $PSScriptRoot
+$tempZip = $null
+if (-not (Test-Path "$sourceRoot\toolchain_packages.ps1")) {
+    $tempZip = "$env:TEMP\helium_infra.zip"
+    $tempExtract = "$env:TEMP\helium_infra_extract"
+    Invoke-WebRequest -Uri "https://github.com/disrado/helium_infra/archive/refs/heads/main.zip" -OutFile $tempZip
+    Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
+    $sourceRoot = "$tempExtract\helium_infra-main\build_env\windows"
 }
-. $packagesScript
 
-$filesToLoad = @("installers\path_utils.ps1", "installers\winget.ps1", "installers\nsis.ps1", "installers\static_exe.ps1") + ($Packages | ForEach-Object { "installers\packages\$_.ps1" })
-foreach ($f in $filesToLoad) {
-    $path = "$PSScriptRoot\$f"
-    if (-not (Test-Path $path)) {
-        New-Item -ItemType Directory -Force -Path (Split-Path $path) | Out-Null
-        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/windows/$f" -OutFile $path
-        $fetchedFiles += $path
-    }
-    . $path
-}
-foreach ($f in $fetchedFiles) { Remove-Item $f -Force }
-foreach ($dir in @("$PSScriptRoot\installers\packages", "$PSScriptRoot\installers")) {
-    if ((Test-Path $dir) -and -not (Get-ChildItem $dir)) { Remove-Item $dir -Force }
-}
+. "$sourceRoot\toolchain_packages.ps1"
+foreach ($name in $Packages) { . "$sourceRoot\installers\packages\$name.ps1" }
 
 New-Item -ItemType Directory -Force -Path @($Root, "$Root\toolchain") | Out-Null
 
@@ -49,5 +39,7 @@ foreach ($line in $vcvarsOutput) {
         [Environment]::SetEnvironmentVariable($matches[1], $matches[2], "Machine")
     }
 }
+
+if ($tempZip) { Remove-Item $tempZip, $tempExtract -Recurse -Force }
 
 Write-Host "Toolchain ready." -ForegroundColor Green

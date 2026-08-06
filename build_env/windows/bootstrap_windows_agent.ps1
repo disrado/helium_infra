@@ -48,13 +48,17 @@ $ErrorActionPreference = "Stop"
 
 $Root = "C:\jenkins-agent"
 
-$toolchainScript = "$PSScriptRoot\bootstrap_toolchain.ps1"
-$fetchedToolchainScript = -not (Test-Path $toolchainScript)
-if ($fetchedToolchainScript) {
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/windows/bootstrap_toolchain.ps1" -OutFile $toolchainScript
+$sourceRoot = $PSScriptRoot
+$tempZip = $null
+if (-not (Test-Path "$sourceRoot\toolchain_packages.ps1")) {
+    $tempZip = "$env:TEMP\helium_infra.zip"
+    $tempExtract = "$env:TEMP\helium_infra_extract"
+    Invoke-WebRequest -Uri "https://github.com/disrado/helium_infra/archive/refs/heads/main.zip" -OutFile $tempZip
+    Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
+    $sourceRoot = "$tempExtract\helium_infra-main\build_env\windows"
 }
-. $toolchainScript
-if ($fetchedToolchainScript) { Remove-Item $toolchainScript -Force }
+
+. "$sourceRoot\bootstrap_toolchain.ps1"
 
 New-Item -ItemType Directory -Force -Path "$Root\workDir" | Out-Null
 
@@ -69,5 +73,7 @@ $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowSt
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERNAME"
 Register-ScheduledTask -TaskName "windows-agent-autostart" -Action $action -Trigger $trigger -User "$env:USERNAME" -RunLevel Highest -Force | Out-Null
 Start-ScheduledTask -TaskName "windows-agent-autostart"
+
+if ($tempZip) { Remove-Item $tempZip, $tempExtract -Recurse -Force }
 
 Write-Host "Done - agent should now show connected in Jenkins." -ForegroundColor Green
