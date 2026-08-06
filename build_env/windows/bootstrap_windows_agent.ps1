@@ -61,8 +61,7 @@ New-Item -ItemType Directory -Force -Path "$Root\workDir" | Out-Null
 $agentJarUrl = "$($JenkinsUrl.TrimEnd('/'))/jnlpJars/agent.jar"
 Invoke-WebRequest -Uri $agentJarUrl -OutFile "$Root\agent.jar"
 
-# No quotes below - every value here is space-free by design.
-$javaExe = "$Toolchain\java\bin\java.exe"
+$javaExe = "$Root\toolchain\java\bin\java.exe"
 $agentCmd = "$javaExe -jar $Root\agent.jar -url $JenkinsUrl -secret $AgentSecret -name $AgentName -workDir $Root\workDir -webSocket"
 
 # schtasks.exe's /tr caps at 261 chars, secret+URL blow past it - Register-ScheduledTask has no such limit.
