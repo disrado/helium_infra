@@ -35,6 +35,8 @@ foreach ($name in $Packages) {
 }
 
 # clang++ still needs vcvarsall's env vars - the onlogon session isn't a Developer Command Prompt.
+# clear first - a stale Machine value would leak into the child process and vcvarsall would stack onto it.
+foreach ($var in @("INCLUDE", "LIB", "LIBPATH")) { Remove-Item "Env:\$var" -ErrorAction SilentlyContinue }
 $vcvarsall = "$Root\toolchain\vs-buildtools\VC\Auxiliary\Build\vcvarsall.bat"
 $vcvarsOutput = cmd /c "`"$vcvarsall`" x64 && set"
 foreach ($line in $vcvarsOutput) {
