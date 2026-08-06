@@ -10,10 +10,15 @@ Tears down the native Windows Jenkins agent - removes the toolchain and schedule
 $ErrorActionPreference = "Stop"
 $Root = "C:\jenkins-agent"
 
-. "$PSScriptRoot\toolchain_packages.ps1"
+$packagesScript = "$PSScriptRoot\toolchain_packages.ps1"
+$fetchedFiles = @()
+if (-not (Test-Path $packagesScript)) {
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/windows/toolchain_packages.ps1" -OutFile $packagesScript
+    $fetchedFiles += $packagesScript
+}
+. $packagesScript
 
 $filesToLoad = @("installers\path_utils.ps1", "installers\winget.ps1", "installers\nsis.ps1", "installers\static_exe.ps1") + ($Packages | ForEach-Object { "installers\packages\$_.ps1" })
-$fetchedFiles = @()
 foreach ($f in $filesToLoad) {
     $path = "$PSScriptRoot\$f"
     if (-not (Test-Path $path)) {
