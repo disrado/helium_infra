@@ -29,6 +29,9 @@ foreach ($f in $filesToLoad) {
     . $path
 }
 foreach ($f in $fetchedFiles) { Remove-Item $f -Force }
+foreach ($dir in @("$PSScriptRoot\installers\packages", "$PSScriptRoot\installers")) {
+    if ((Test-Path $dir) -and -not (Get-ChildItem $dir)) { Remove-Item $dir -Force }
+}
 
 Unregister-ScheduledTask -TaskName "windows-agent-autostart" -Confirm:$false -ErrorAction SilentlyContinue
 
