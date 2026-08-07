@@ -12,7 +12,7 @@ github_ranges="$(curl -s https://api.github.com/meta | jq -r '.hooks[]')"
 # re-derive from scratch every run - simpler than diffing current vs desired state, and cheap enough to run on a timer.
 old_rule_numbers="$(ufw status numbered | grep "$TAG" | grep -oE '^\[[0-9]+\]' | tr -d '[]' | sort -rn || true)"
 for num in $old_rule_numbers; do
-    yes | ufw delete "$num" >/dev/null
+    ufw --force delete "$num" >/dev/null
 done
 
 for port in "${PORTS[@]}"; do
