@@ -2,7 +2,7 @@
 set -euo pipefail
 
 TAG="webhook-allowlist"
-HOME_HOSTNAME="29eb42bf58d6635c1deff18b.keenetic.io"
+HOME_HOSTNAME="disrado.ddns.net"
 PORTS=(80 443)
 
 home_v4="$(dig +short -t A "$HOME_HOSTNAME" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | tail -n1 || true)"
