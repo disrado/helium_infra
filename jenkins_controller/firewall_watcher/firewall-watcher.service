@@ -1,0 +1,6 @@
+[Unit]
+Description=Refresh UFW allowlist (home IP + GitHub webhook ranges) for ports 80/443
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/firewall_watcher.sh

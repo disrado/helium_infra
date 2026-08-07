@@ -7,14 +7,20 @@ ssh_pwauth: false
 packages:
   - ufw
   - fail2ban
+  - jq
+  - dnsutils
 
 runcmd:
   - curl -fsSL https://get.docker.com | sh
   - systemctl enable docker
   - systemctl start docker
   - ufw allow 22/tcp
-  - ufw allow 80/tcp
-  - ufw allow 443/tcp
   - ufw --force enable
   - systemctl enable fail2ban
   - systemctl start fail2ban
+  - curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/jenkins_controller/firewall_watcher/firewall_watcher.sh -o /usr/local/bin/firewall_watcher.sh
+  - chmod +x /usr/local/bin/firewall_watcher.sh
+  - curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/jenkins_controller/firewall_watcher/firewall-watcher.service -o /etc/systemd/system/firewall-watcher.service
+  - curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/jenkins_controller/firewall_watcher/firewall-watcher.timer -o /etc/systemd/system/firewall-watcher.timer
+  - systemctl daemon-reload
+  - systemctl enable --now firewall-watcher.timer
