@@ -17,11 +17,14 @@ for num in $old_rule_numbers; do
     iptables -D DOCKER-USER "$num"
 done
 
+# -i eth0 scopes this to traffic arriving from the internet only - without it, this also caught containers'
+# own outbound calls (e.g. Jenkins hitting api.github.com), which broke GitHub App token generation entirely.
+#
 # insertion order matters: each -I ... 1 lands on top of whatever's already there, so insert the DROP
 # first, then the RETURN rules after - by the end, all RETURNs sit above the DROP.
-iptables -I DOCKER-USER 1 -p tcp -m multiport --dports 80,443 -j DROP -m comment --comment "$TAG"
+iptables -I DOCKER-USER 1 -i eth0 -p tcp -m multiport --dports 80,443 -j DROP -m comment --comment "$TAG"
 
-[ -n "$home_v4" ] && iptables -I DOCKER-USER 1 -p tcp -s "$home_v4" -m multiport --dports 80,443 -j RETURN -m comment --comment "$TAG"
+[ -n "$home_v4" ] && iptables -I DOCKER-USER 1 -i eth0 -p tcp -s "$home_v4" -m multiport --dports 80,443 -j RETURN -m comment --comment "$TAG"
 for cidr in $github_v4_ranges; do
-    iptables -I DOCKER-USER 1 -p tcp -s "$cidr" -m multiport --dports 80,443 -j RETURN -m comment --comment "$TAG"
+    iptables -I DOCKER-USER 1 -i eth0 -p tcp -s "$cidr" -m multiport --dports 80,443 -j RETURN -m comment --comment "$TAG"
 done
