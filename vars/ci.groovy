@@ -3,6 +3,7 @@ def call() {
         agent none
         options {
             disableConcurrentBuilds(abortPrevious: true)
+            buildDiscarder(logRotator(numToKeepStr: '10'))
         }
         environment {
             IMAGE = 'helium-linux-build-env:latest'
