@@ -1,1 +1,1 @@
-$Packages = @("Git", "CMake", "Java", "LLVM", "Ninja", "VsBuildTools", "Vcpkg")
+$Packages = @("Git", "CMake", "Java", "LLVM", "Ninja", "VsBuildTools", "Vcpkg", "Python", "Scons")

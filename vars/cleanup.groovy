@@ -2,12 +2,20 @@ def call() {
     parallel(
         wsl: {
             node('wsl') {
-                cleanWs()
+                cleanWs(patterns: [
+                    [pattern: 'build/**', type: 'EXCLUDE'],
+                    [pattern: 'deps/godot/**', type: 'EXCLUDE'],
+                    [pattern: 'deps/godot_cpp/**', type: 'EXCLUDE']
+                ])
             }
         },
         windows: {
             node('windows') {
-                cleanWs()
+                cleanWs(patterns: [
+                    [pattern: 'build/**', type: 'EXCLUDE'],
+                    [pattern: 'deps/godot/**', type: 'EXCLUDE'],
+                    [pattern: 'deps/godot_cpp/**', type: 'EXCLUDE']
+                ])
             }
         }
     )

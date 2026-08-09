@@ -2,12 +2,12 @@ def call() {
     parallel(
         wsl: {
             node('wsl') {
-                runInContainer('build/linux-release/src/helium_test_suite')
+                runInContainer('ctest --preset linux-release')
             }
         },
         windows: {
             node('windows') {
-                bat 'build\\win-debug\\src\\helium_test_suite.exe'
+                bat 'ctest --preset win-debug'
             }
         }
     )

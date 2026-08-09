@@ -2,13 +2,15 @@ def call() {
     parallel(
         wsl: {
             node('wsl') {
-                checkout scm
+                checkout([$class: 'GitSCM', branches: scm.branches, userRemoteConfigs: scm.userRemoteConfigs,
+                          extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true, parentCredentials: true]]])
                 runInContainer('cmake --preset linux-release')
             }
         },
         windows: {
             node('windows') {
-                checkout scm
+                checkout([$class: 'GitSCM', branches: scm.branches, userRemoteConfigs: scm.userRemoteConfigs,
+                          extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true, parentCredentials: true]]])
                 bat 'cmake --preset win-debug'
             }
         }
