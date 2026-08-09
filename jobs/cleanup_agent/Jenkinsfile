@@ -1,0 +1,21 @@
+pipeline {
+    agent none
+    parameters {
+        choice(name: 'NODE_NAME', choices: ['wsl_agent', 'windows_agent'], description: 'Which machine to clean up')
+    }
+    stages {
+        stage('Cleanup') {
+            agent { label params.NODE_NAME }
+            steps {
+                script {
+                    if (env.NODE_LABELS.tokenize().contains('wsl')) {
+                        sh 'bash build_env/linux/cleanup_artifacts.sh'
+                    } else {
+                        bat 'powershell -ExecutionPolicy Bypass -File build_env/windows/cleanup_artifacts.ps1'
+                    }
+                }
+            }
+            post { always { cleanWs() } }
+        }
+    }
+}
