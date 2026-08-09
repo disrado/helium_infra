@@ -13,20 +13,36 @@ def call() {
                     stage('wsl') {
                         agent { label 'wsl' }
                         stages {
-                            stage('Configure') { steps { script { configure('wsl') } } }
-                            stage('Build')     { steps { script { build('wsl') } } }
-                            stage('Test')      { steps { script { test('wsl') } } }
+                            stage('Configure') {
+                                steps { script { catchError(stageResult: 'FAILURE') { configure('wsl') } } }
+                            }
+                            stage('Build') {
+                                when { expression { currentBuild.currentResult != 'FAILURE' } }
+                                steps { script { catchError(stageResult: 'FAILURE') { build('wsl') } } }
+                            }
+                            stage('Test') {
+                                when { expression { currentBuild.currentResult != 'FAILURE' } }
+                                steps { script { catchError(stageResult: 'FAILURE') { test('wsl') } } }
+                            }
+                            stage('Cleanup') { steps { script { cleanup() } } }
                         }
-                        post { always { script { cleanup() } } }
                     }
                     stage('windows') {
                         agent { label 'windows' }
                         stages {
-                            stage('Configure') { steps { script { configure('windows') } } }
-                            stage('Build')     { steps { script { build('windows') } } }
-                            stage('Test')      { steps { script { test('windows') } } }
+                            stage('Configure') {
+                                steps { script { catchError(stageResult: 'FAILURE') { configure('windows') } } }
+                            }
+                            stage('Build') {
+                                when { expression { currentBuild.currentResult != 'FAILURE' } }
+                                steps { script { catchError(stageResult: 'FAILURE') { build('windows') } } }
+                            }
+                            stage('Test') {
+                                when { expression { currentBuild.currentResult != 'FAILURE' } }
+                                steps { script { catchError(stageResult: 'FAILURE') { test('windows') } } }
+                            }
+                            stage('Cleanup') { steps { script { cleanup() } } }
                         }
-                        post { always { script { cleanup() } } }
                     }
                 }
             }
