@@ -1,14 +1,7 @@
-def call() {
-    parallel(
-        wsl: {
-            node('wsl') {
-                runInContainer('ctest --preset linux-release')
-            }
-        },
-        windows: {
-            node('windows') {
-                bat 'ctest --preset win-debug'
-            }
-        }
-    )
+def call(platform) {
+    if (platform == 'wsl') {
+        runInContainer('ctest --preset linux-release')
+    } else {
+        bat 'ctest --preset win-debug'
+    }
 }
