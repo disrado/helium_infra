@@ -1,8 +1,8 @@
 def call(command) {
-    sh """docker run --rm -v \$WORKSPACE:/workspace -v vcpkg_cache:/root/.cache/vcpkg -w /workspace ${env.IMAGE} bash -c '
+    sh """docker run --rm -v \$WORKSPACE:/workspace -v vcpkg_cache:/home/ubuntu/.cache/vcpkg -w /workspace ${env.IMAGE} bash -c '
         dump_logs_on_failure() {
             if [ "\$1" -ne 0 ]; then
-                find /opt/vcpkg/buildtrees -name \"*.log\" -exec echo ==={}=== \\; -exec cat {} \\;
+                find /home/ubuntu/vcpkg/buildtrees -name \"*.log\" -exec echo ==={}=== \\; -exec cat {} \\;
             fi
         }
 

@@ -8,5 +8,8 @@ RUN apt-get update && apt-get install -y \
     && pip install --break-system-packages cmake scons \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/microsoft/vcpkg /opt/vcpkg && /opt/vcpkg/bootstrap-vcpkg.sh
-ENV VCPKG_ROOT=/opt/vcpkg
+USER ubuntu
+
+RUN git clone https://github.com/microsoft/vcpkg /home/ubuntu/vcpkg \
+    && /home/ubuntu/vcpkg/bootstrap-vcpkg.sh
+ENV VCPKG_ROOT=/home/ubuntu/vcpkg
