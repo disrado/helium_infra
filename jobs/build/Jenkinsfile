@@ -1,7 +1,10 @@
 pipeline {
     agent none
     parameters {
-        gitParameter name: 'BRANCH', type: 'PT_BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'main',
+        // branchFilter matches 'origin1' because that's the Jenkins-assigned name for the second SCM
+        // remote (helium.git) on this job - depends on remote add-order in the job's UI config, and
+        // will silently break (empty BRANCH dropdown) if that remote is ever re-added/reordered.
+        gitParameter name: 'BRANCH', type: 'PT_BRANCH', branchFilter: 'origin1/(.*)', defaultValue: 'main',
                      useRepository: 'https://github.com/disrado/helium.git',
                      sortMode: 'ASCENDING_SMART', description: 'helium branch to build'
         booleanParam(name: 'LINUX', defaultValue: true, description: 'Build linux')
