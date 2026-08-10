@@ -6,7 +6,7 @@ pipeline {
         // will silently break (empty BRANCH dropdown) if that remote is ever re-added/reordered.
         gitParameter name: 'BRANCH', type: 'PT_BRANCH', branchFilter: 'origin1/(.*)', defaultValue: 'main',
                      useRepository: 'https://github.com/disrado/helium.git',
-                     sortMode: 'ASCENDING_SMART', description: 'helium branch to build'
+                     sortMode: 'ASCENDING_SMART', description: 'helium branch to build', listSize: '1', 
         booleanParam(name: 'LINUX', defaultValue: true, description: 'Build linux')
         booleanParam(name: 'WINDOWS', defaultValue: true, description: 'Build windows')
     }
