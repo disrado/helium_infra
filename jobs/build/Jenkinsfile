@@ -1,6 +1,9 @@
 pipeline {
     agent none
     parameters {
+        gitParameter name: 'BRANCH', type: 'PT_BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'main',
+                     useRepository: 'https://github.com/disrado/helium.git', credentialsId: 'helium_github_app',
+                     sortMode: 'ASCENDING_SMART', description: 'helium branch to build'
         booleanParam(name: 'LINUX', defaultValue: true, description: 'Build linux')
         booleanParam(name: 'WINDOWS', defaultValue: true, description: 'Build windows')
     }
@@ -14,7 +17,7 @@ pipeline {
                     when { expression { params.LINUX } }
                     agent { label 'wsl' }
                     stages {
-                        stage('Configure') { steps { script { configure('linux') } } }
+                        stage('Configure') { steps { script { configure('linux', params.BRANCH) } } }
                         stage('Build')     { steps { script { build('linux') } } }
                         stage('Test')      { steps { script { test('linux') } } }
                     }
@@ -24,7 +27,7 @@ pipeline {
                     when { expression { params.WINDOWS } }
                     agent { label 'windows' }
                     stages {
-                        stage('Configure') { steps { script { configure('windows') } } }
+                        stage('Configure') { steps { script { configure('windows', params.BRANCH) } } }
                         stage('Build')     { steps { script { build('windows') } } }
                         stage('Test')      { steps { script { test('windows') } } }
                     }
