@@ -1,5 +1,5 @@
 def call(platform) {
-    if (platform == 'wsl') {
+    if (platform == 'linux') {
         runInContainer('cmake --build --preset linux-release')
         runInContainer('cmake --build --preset editor-linux')
     } else {

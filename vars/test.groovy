@@ -1,5 +1,5 @@
 def call(platform) {
-    if (platform == 'wsl') {
+    if (platform == 'linux') {
         runInContainer('ctest --preset linux-release')
     } else {
         bat 'ctest --preset win-debug'
