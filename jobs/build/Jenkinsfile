@@ -1,0 +1,36 @@
+pipeline {
+    agent none
+    parameters {
+        booleanParam(name: 'LINUX', defaultValue: true, description: 'Build linux')
+        booleanParam(name: 'WINDOWS', defaultValue: true, description: 'Build windows')
+    }
+    environment {
+        IMAGE = 'helium-linux-build-env:latest'
+    }
+    stages {
+        stage('Platforms') {
+            parallel {
+                stage('linux') {
+                    when { expression { params.LINUX } }
+                    agent { label 'wsl' }
+                    stages {
+                        stage('Configure') { steps { script { configure('linux') } } }
+                        stage('Build')     { steps { script { build('linux') } } }
+                        stage('Test')      { steps { script { test('linux') } } }
+                    }
+                    post { always { script { cleanup() } } }
+                }
+                stage('windows') {
+                    when { expression { params.WINDOWS } }
+                    agent { label 'windows' }
+                    stages {
+                        stage('Configure') { steps { script { configure('windows') } } }
+                        stage('Build')     { steps { script { build('windows') } } }
+                        stage('Test')      { steps { script { test('windows') } } }
+                    }
+                    post { always { script { cleanup() } } }
+                }
+            }
+        }
+    }
+}
