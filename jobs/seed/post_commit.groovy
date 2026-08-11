@@ -27,12 +27,9 @@ multibranchPipelineJob('post_commit') {
     // GitHubBranchSourceContext (job-dsl-core) predates the traits API entirely (no plugin ships trait
     // support for Job DSL either) - traits must be patched into the generated XML directly.
     configure { node ->
-        def sourcesNode = node.children().find { it.name() == 'sources' }
-        def dataNode = sourcesNode.children().find { it.name() == 'data' }
-        def branchSourceNode = dataNode.children().find { it.name() == 'jenkins.branch.BranchSource' }
-        def sourceNode = branchSourceNode.children().find { it.name() == 'source' }
-        sourceNode.children().findAll { it.name() == 'traits' }.each { sourceNode.remove(it) }
-        def traits = sourceNode.appendNode('traits')
+        def source = node.sources[0].data[0].'jenkins.branch.BranchSource'[0].source[0]
+        source.traits.each { source.remove(it) }
+        def traits = source.appendNode('traits')
         traits.appendNode('org.jenkinsci.plugins.github__branch__source.BranchDiscoveryTrait')
               .appendNode('strategyId', 1)
     }
