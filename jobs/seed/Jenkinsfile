@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Seed') {
             steps {
-                jobDsl targets: 'jobs/seed/*.groovy', removedJobAction: 'IGNORE', removedViewAction: 'IGNORE'
+                jobDsl targets: 'jobs/seed/*.groovy', removedJobAction: 'IGNORE', removedViewAction: 'IGNORE', sandbox: true
             }
         }
     }
