@@ -2,20 +2,10 @@ multibranchPipelineJob('pre_commit') {
     branchSources {
         github {
             id('1')
+            apiUri('https://api.github.com')
             scanCredentialsId('helium_github_app')
             repoOwner('disrado')
             repository('helium')
-            traits {
-                gitHubPullRequestDiscovery {
-                    strategyId(2)
-                }
-                gitHubForkDiscovery {
-                    strategyId(2)
-                    trust {
-                        gitHubTrustPermissions()
-                    }
-                }
-            }
         }
     }
     orphanedItemStrategy {
@@ -33,5 +23,17 @@ multibranchPipelineJob('pre_commit') {
         workflowBranchProjectFactory {
             scriptPath('Jenkinsfile')
         }
+    }
+    // GitHubBranchSourceContext (job-dsl-core) predates the traits API entirely (no plugin ships trait
+    // support for Job DSL either) - traits must be patched into the generated XML directly.
+    configure { node ->
+        def source = node.sources[0].data[0].'jenkins.branch.BranchSource'[0].source[0]
+        source.traits.each { source.remove(it) }
+        def traits = source.appendNode('traits')
+        traits.appendNode('org.jenkinsci.plugins.github__branch__source.OriginPullRequestDiscoveryTrait')
+              .appendNode('strategyId', 2)
+        def forkTrait = traits.appendNode('org.jenkinsci.plugins.github__branch__source.ForkPullRequestDiscoveryTrait')
+        forkTrait.appendNode('strategyId', 2)
+        forkTrait.appendNode('trust', [class: 'org.jenkinsci.plugins.github_branch_source.ForkPullRequestDiscoveryTrait$TrustPermission'])
     }
 }
