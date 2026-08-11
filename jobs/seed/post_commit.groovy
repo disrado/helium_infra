@@ -16,7 +16,7 @@ multibranchPipelineJob('post_commit') {
     }
     triggers {
         periodicFolderTrigger {
-            interval('4h')
+            interval('1d')
         }
     }
     factory {
