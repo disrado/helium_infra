@@ -13,7 +13,8 @@ services:
       - jenkins_net
 
   jenkins:
-    image: jenkins/jenkins:lts
+    build: .
+    image: helium-jenkins-controller:latest
     restart: unless-stopped
     volumes:
       - jenkins_home:/var/jenkins_home

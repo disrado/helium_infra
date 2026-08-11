@@ -1,0 +1,10 @@
+pipeline {
+    agent any
+    stages {
+        stage('Seed') {
+            steps {
+                jobDsl targets: 'jobs/seed/*.groovy', removedJobAction: 'IGNORE', removedViewAction: 'IGNORE'
+            }
+        }
+    }
+}
