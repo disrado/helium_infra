@@ -8,15 +8,23 @@ function Install-StaticExe
     New-Item -ItemType Directory -Force -Path $Location | Out-Null
     $zip = "$env:TEMP\$([guid]::NewGuid()).zip"
     $extractDir = "$env:TEMP\$([guid]::NewGuid())"
+    # avoids .NET quirks that cause spurious connection resets against GitHub's CDN
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    # .NET's HttpWebRequest sends "Expect: 100-continue" by default, which GitHub's release CDN
-    # doesn't handle gracefully - causes "the underlying connection was closed" on every attempt.
     [Net.ServicePointManager]::Expect100Continue = $false
-    Invoke-WebRequest -Uri $Url -OutFile $zip -UseBasicParsing
+    $attempt = 0
+    do {
+        $attempt++
+        try {
+            Invoke-WebRequest -Uri $Url -OutFile $zip -UseBasicParsing
+            break
+        } catch {
+            if ($attempt -ge 5) { throw }
+            Start-Sleep -Seconds (5 * $attempt)
+        }
+    } while ($true)
     Expand-Archive -Path $zip -DestinationPath $extractDir -Force
     Remove-Item $zip -Force
-    # Some releases (e.g. git-lfs) nest everything under a top-level version folder instead of
-    # putting the exe at the archive root (like ninja-win.zip does) - locate it wherever it landed.
+    # locate exe regardless of archive nesting (varies per release)
     $exeName = Split-Path $Marker -Leaf
     $found = Get-ChildItem -Path $extractDir -Filter $exeName -Recurse | Select-Object -First 1
     if (-not $found) { throw "$exeName not found anywhere in downloaded archive" }
