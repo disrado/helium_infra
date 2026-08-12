@@ -1,16 +1,16 @@
-. "$PSScriptRoot\..\winget.ps1"
+. "$PSScriptRoot\..\static_exe.ps1"
 
 function Install-GitLFS
 {
     param($Root)
-    Install-WingetTool -Id "GitHub.GitLFS" -Version "3.7.1" -Location "$Root\toolchain\git-lfs" -Marker "$Root\toolchain\git-lfs\git-lfs.exe"
+    Install-StaticExe -Version "3.7.1" -Url "https://github.com/git-lfs/git-lfs/releases/download/v3.7.1/git-lfs-windows-amd64-v3.7.1.zip" -Location "$Root\toolchain\git-lfs" -Marker "$Root\toolchain\git-lfs\git-lfs.exe"
     git lfs install --system
 }
 
 function Uninstall-GitLFS
 {
     param($Root)
-    Uninstall-WingetTool -Id "GitHub.GitLFS" -Marker "$Root\toolchain\git-lfs\git-lfs.exe"
+    Uninstall-StaticExe -Location "$Root\toolchain\git-lfs" -Marker "$Root\toolchain\git-lfs\git-lfs.exe"
 }
 
 function Assert-GitLFSInstalled
