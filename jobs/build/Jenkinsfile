@@ -8,6 +8,7 @@ pipeline {
         gitParameter name: 'BRANCH', type: 'PT_BRANCH', branchFilter: 'origin1/(.*)', defaultValue: 'main',
                      useRepository: 'https://github.com/disrado/helium.git',
                      sortMode: 'ASCENDING_SMART', description: 'helium branch to build', listSize: '1'
+        separator(name: 'platforms_separator', sectionHeader: 'Platforms')
         booleanParam(name: 'LINUX', defaultValue: true, description: 'Build linux')
         booleanParam(name: 'WINDOWS', defaultValue: true, description: 'Build windows')
         choice(name: 'BUILD_TYPE', choices: ['debug', 'release'], description: 'Build configuration')
