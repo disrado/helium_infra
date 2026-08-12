@@ -8,7 +8,11 @@ function Install-StaticExe
     New-Item -ItemType Directory -Force -Path $Location | Out-Null
     $zip = "$env:TEMP\$([guid]::NewGuid()).zip"
     $extractDir = "$env:TEMP\$([guid]::NewGuid())"
-    Invoke-WebRequest -Uri $Url -OutFile $zip
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    # .NET's HttpWebRequest sends "Expect: 100-continue" by default, which GitHub's release CDN
+    # doesn't handle gracefully - causes "the underlying connection was closed" on every attempt.
+    [Net.ServicePointManager]::Expect100Continue = $false
+    Invoke-WebRequest -Uri $Url -OutFile $zip -UseBasicParsing
     Expand-Archive -Path $zip -DestinationPath $extractDir -Force
     Remove-Item $zip -Force
     # Some releases (e.g. git-lfs) nest everything under a top-level version folder instead of
