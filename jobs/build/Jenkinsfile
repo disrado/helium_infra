@@ -2,16 +2,18 @@
 pipeline {
     agent none
     parameters {
+        separator(name: 'branch_separator', sectionHeader: 'Branch')
         // branchFilter matches 'origin1' because that's the Jenkins-assigned name for the second SCM
         // remote (helium.git) on this job - depends on remote add-order in the job's UI config, and
-        // will silently break (empty BRANCH dropdown) if that remote is ever re-added/reordered.
-        gitParameter name: 'BRANCH', type: 'PT_BRANCH', branchFilter: 'origin1/(.*)', defaultValue: 'main',
+        // will silently break (empty Branch dropdown) if that remote is ever re-added/reordered.
+        gitParameter name: 'Branch', type: 'PT_BRANCH', branchFilter: 'origin1/(.*)', defaultValue: 'main',
                      useRepository: 'https://github.com/disrado/helium.git',
                      sortMode: 'ASCENDING_SMART', description: 'helium branch to build', listSize: '1'
         separator(name: 'platforms_separator', sectionHeader: 'Platforms')
-        booleanParam(name: 'LINUX', defaultValue: true, description: 'Build linux')
-        booleanParam(name: 'WINDOWS', defaultValue: true, description: 'Build windows')
-        choice(name: 'BUILD_TYPE', choices: ['debug', 'release'], description: 'Build configuration')
+        booleanParam(name: 'Linux', defaultValue: true, description: 'Build linux')
+        booleanParam(name: 'Windows', defaultValue: true, description: 'Build windows')
+        separator(name: 'build_type_separator', sectionHeader: 'Build type')
+        choice(name: 'BuildType', choices: ['debug', 'release'], description: 'Build configuration')
     }
     environment {
         IMAGE = 'helium-linux-build-env:latest'
@@ -20,22 +22,22 @@ pipeline {
         stage('Platforms') {
             parallel {
                 stage('linux') {
-                    when { expression { params.LINUX } }
+                    when { expression { params.Linux } }
                     agent { label 'wsl' }
                     stages {
-                        stage('Configure') { steps { script { configure('linux', params.BRANCH, params.BUILD_TYPE) } } }
-                        stage('Build')     { steps { script { build('linux', params.BUILD_TYPE, 'game') } } }
-                        stage('Test')      { steps { script { test('linux', params.BUILD_TYPE) } } }
+                        stage('Configure') { steps { script { configure('linux', params.Branch, params.BuildType) } } }
+                        stage('Build')     { steps { script { build('linux', params.BuildType, 'game') } } }
+                        stage('Test')      { steps { script { test('linux', params.BuildType) } } }
                     }
                     post { always { script { cleanup() } } }
                 }
                 stage('windows') {
-                    when { expression { params.WINDOWS } }
+                    when { expression { params.Windows } }
                     agent { label 'windows' }
                     stages {
-                        stage('Configure') { steps { script { configure('windows', params.BRANCH, params.BUILD_TYPE) } } }
-                        stage('Build')     { steps { script { build('windows', params.BUILD_TYPE, 'game') } } }
-                        stage('Test')      { steps { script { test('windows', params.BUILD_TYPE) } } }
+                        stage('Configure') { steps { script { configure('windows', params.Branch, params.BuildType) } } }
+                        stage('Build')     { steps { script { build('windows', params.BuildType, 'game') } } }
+                        stage('Test')      { steps { script { test('windows', params.BuildType) } } }
                     }
                     post { always { script { cleanup() } } }
                 }
