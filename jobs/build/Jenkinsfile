@@ -10,6 +10,7 @@ pipeline {
                      sortMode: 'ASCENDING_SMART', description: 'helium branch to build', listSize: '1'
         booleanParam(name: 'LINUX', defaultValue: true, description: 'Build linux')
         booleanParam(name: 'WINDOWS', defaultValue: true, description: 'Build windows')
+        choice(name: 'BUILD_TYPE', choices: ['debug', 'release'], description: 'Build configuration')
     }
     environment {
         IMAGE = 'helium-linux-build-env:latest'
@@ -21,9 +22,9 @@ pipeline {
                     when { expression { params.LINUX } }
                     agent { label 'wsl' }
                     stages {
-                        stage('Configure') { steps { script { configure('linux', params.BRANCH) } } }
-                        stage('Build')     { steps { script { build('linux') } } }
-                        stage('Test')      { steps { script { test('linux') } } }
+                        stage('Configure') { steps { script { configure('linux', params.BRANCH, params.BUILD_TYPE) } } }
+                        stage('Build')     { steps { script { build('linux', params.BUILD_TYPE, 'game') } } }
+                        stage('Test')      { steps { script { test('linux', params.BUILD_TYPE) } } }
                     }
                     post { always { script { cleanup() } } }
                 }
@@ -31,9 +32,9 @@ pipeline {
                     when { expression { params.WINDOWS } }
                     agent { label 'windows' }
                     stages {
-                        stage('Configure') { steps { script { configure('windows', params.BRANCH) } } }
-                        stage('Build')     { steps { script { build('windows') } } }
-                        stage('Test')      { steps { script { test('windows') } } }
+                        stage('Configure') { steps { script { configure('windows', params.BRANCH, params.BUILD_TYPE) } } }
+                        stage('Build')     { steps { script { build('windows', params.BUILD_TYPE, 'game') } } }
+                        stage('Test')      { steps { script { test('windows', params.BUILD_TYPE) } } }
                     }
                     post { always { script { cleanup() } } }
                 }

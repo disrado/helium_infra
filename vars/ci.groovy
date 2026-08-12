@@ -15,15 +15,15 @@ def call() {
                         agent { label 'wsl' }
                         stages {
                             stage('Configure') {
-                                steps { script { catchError(stageResult: 'FAILURE') { configure('linux') } } }
+                                steps { script { catchError(stageResult: 'FAILURE') { configure('linux', null, 'debug') } } }
                             }
                             stage('Build') {
                                 when { expression { currentBuild.currentResult != 'FAILURE' } }
-                                steps { script { catchError(stageResult: 'FAILURE') { build('linux') } } }
+                                steps { script { catchError(stageResult: 'FAILURE') { build('linux', 'debug') } } }
                             }
                             stage('Test') {
                                 when { expression { currentBuild.currentResult != 'FAILURE' } }
-                                steps { script { catchError(stageResult: 'FAILURE') { test('linux') } } }
+                                steps { script { catchError(stageResult: 'FAILURE') { test('linux', 'debug') } } }
                             }
                             stage('Cleanup') { steps { script { cleanup() } } }
                         }
@@ -32,15 +32,15 @@ def call() {
                         agent { label 'windows' }
                         stages {
                             stage('Configure') {
-                                steps { script { catchError(stageResult: 'FAILURE') { configure('windows') } } }
+                                steps { script { catchError(stageResult: 'FAILURE') { configure('windows', null, 'debug') } } }
                             }
                             stage('Build') {
                                 when { expression { currentBuild.currentResult != 'FAILURE' } }
-                                steps { script { catchError(stageResult: 'FAILURE') { build('windows') } } }
+                                steps { script { catchError(stageResult: 'FAILURE') { build('windows', 'debug') } } }
                             }
                             stage('Test') {
                                 when { expression { currentBuild.currentResult != 'FAILURE' } }
-                                steps { script { catchError(stageResult: 'FAILURE') { test('windows') } } }
+                                steps { script { catchError(stageResult: 'FAILURE') { test('windows', 'debug') } } }
                             }
                             stage('Cleanup') { steps { script { cleanup() } } }
                         }

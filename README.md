@@ -1,5 +1,7 @@
 # helium project infrastructure
 
+Controller has 0 executors (deliberate hardening) - set up at least one agent before running `seed`.
+
 ## Setup WSL agent
 
 ### 1. Create the Jenkins node

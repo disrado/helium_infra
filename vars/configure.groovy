@@ -1,4 +1,4 @@
-def call(platform, branch = null) {
+def call(platform, branch = null, buildType = 'debug') {
     if (branch) {
         checkout([$class: 'GitSCM', branches: [[name: "*/${branch}"]],
                   userRemoteConfigs: [[url: 'https://github.com/disrado/helium.git', credentialsId: 'helium_github_app']],
@@ -7,9 +7,10 @@ def call(platform, branch = null) {
         checkout([$class: 'GitSCM', branches: scm.branches, userRemoteConfigs: scm.userRemoteConfigs,
                   extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true, parentCredentials: true]]])
     }
+    def preset = platform == 'linux' ? "linux-${buildType}" : "win-${buildType}"
     if (platform == 'linux') {
-        runInContainer('cmake --preset linux-release')
+        runInContainer("cmake --preset ${preset}")
     } else {
-        bat 'cmake --preset win-debug'
+        bat "cmake --preset ${preset}"
     }
 }

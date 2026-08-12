@@ -1,7 +1,8 @@
-def call(platform) {
+def call(platform, buildType = 'debug') {
+    def preset = platform == 'linux' ? "linux-${buildType}" : "win-${buildType}"
     if (platform == 'linux') {
-        runInContainer('ctest --preset linux-release')
+        runInContainer("ctest --preset ${preset}")
     } else {
-        bat 'ctest --preset win-debug'
+        bat "ctest --preset ${preset}"
     }
 }
