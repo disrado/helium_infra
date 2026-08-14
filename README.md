@@ -1,6 +1,61 @@
 # helium project infrastructure
 
-Controller has 0 executors (deliberate hardening) - set up at least one agent before running `seed`.
+## Setup controller
+
+### 1. Provision a host
+
+Any Docker-capable Linux host with a public IP works. `jenkins_controller/cloud-config` is cloud-init
+user-data that installs required dependencies and setups firewall.
+
+### 2. Clone this repo onto the host
+
+```
+git clone https://github.com/disrado/helium_infra.git
+```
+
+### 3. Point a domain at it
+
+Create a DNS A record for your domain pointing at the host's IP. Then edit `jenkins_controller/Caddyfile`, replacing the placeholder domain
+with your own - it reverse-proxies to Jenkins.
+
+### 4. Start the stack
+
+```
+cd jenkins_controller
+docker compose up -d
+```
+
+### 5. Finish setup
+
+Complete Jenkins's own setup wizard (take generated password fomr `jenkins_home/secrets/initialAdminPassword` or from logs). 
+
+Set executors on the controller to 0 before registering any agents.
+
+### 6. Set up GitHub App access
+
+Create a GitHub App with `Contents: Read-only`
+and `Commit statuses: Read & write` permissions. Set its webhook active,
+pointing at `https://<jenkins-url>/github-webhook/`, subscribed to `Push` + `Pull request` events. Install the App on `helium` and
+`helium_infra`.
+
+Generate a private key - GitHub issues it as PKCS#1, but Jenkins' GitHub Branch Source plugin needs PKCS#8:
+```
+openssl pkcs8 -topk8 -inform PEM -outform PEM -in downloaded-key.pem -out converted-key.pem -nocrypt
+```
+
+In Jenkins Credentials:
+- add a **GitHub App** credential with the App ID + converted key, ID `helium_github_app`
+- add the webhook's shared secret as a **Secret text** credential, ID `gh_webhook_secret` - verifies incoming webhook signatures
+
+### 7. Create and run the seed job
+
+Manually create one Pipeline job named `seed`:
+- pipeline script from SCM
+- `https://github.com/disrado/helium_infra.git`
+- branch `infra/main`
+- script path `jobs/seed/Jenkinsfile`.
+- uses the `helium_github_app` credential from the previous step (same one the generated jobs use)
+- requires at least one connected agent (`seed`'s pipeline runs `agent any`, and the controller itself has 0 executors).
 
 ## Setup WSL agent
 
