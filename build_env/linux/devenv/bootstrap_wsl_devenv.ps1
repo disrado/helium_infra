@@ -33,39 +33,16 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # WSL's first-launch OOBE can silently fall back to root instead of prompting - don't
-# depend on it, ensure the user ourselves and target it explicitly via -u.
-$ensureUser = @"
-id -u $Username &>/dev/null || useradd -m -s /bin/bash -G sudo $Username
-echo '$Username ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/$Username
-"@
-$ensureUser | wsl -d $Distro -u root -- bash -s --
+# depend on it, ensure the user ourselves and target it explicitly via -u. Setup logic lives
+# in real .sh files fetched via curl (not inline heredocs) - PowerShell here-strings normalize
+# to CRLF internally regardless of the source file's own line endings, which corrupts bash.
+wsl -d $Distro -u root -- bash -c "curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/devenv/ensure_user.sh -o /tmp/ensure_user.sh && chmod +x /tmp/ensure_user.sh && /tmp/ensure_user.sh $Username"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to ensure user '$Username' exists - see the error above." -ForegroundColor Red
     exit $LASTEXITCODE
 }
 
-$linuxSetup = @'
-set -euo pipefail
-
-sudo apt-get update && sudo apt-get install -y git-lfs zsh
-git lfs install
-sudo chsh -s "$(which zsh)" "$USER"
-
-curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/installers/install_build_packages.sh -o /tmp/install_build_packages.sh
-curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/installers/install_vcpkg.sh -o /tmp/install_vcpkg.sh
-chmod +x /tmp/install_build_packages.sh /tmp/install_vcpkg.sh
-
-sudo /tmp/install_build_packages.sh
-RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" < /dev/null
-/tmp/install_vcpkg.sh
-grep -q '^export VCPKG_ROOT=' ~/.zshenv 2>/dev/null || echo 'export VCPKG_ROOT=$HOME/vcpkg' >> ~/.zshenv
-
-mkdir -p ~/src
-[ -d ~/src/helium/.git ] || git clone https://github.com/disrado/helium.git ~/src/helium
-git -C ~/src/helium submodule update --init deps/godot_cpp
-'@
-
-$linuxSetup | wsl -d $Distro -u $Username -- bash -s --
+wsl -d $Distro -u $Username -- bash -c "curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/devenv/devenv_setup.sh -o /tmp/devenv_setup.sh && chmod +x /tmp/devenv_setup.sh && /tmp/devenv_setup.sh"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Setup failed - see the error above." -ForegroundColor Red
     exit $LASTEXITCODE
