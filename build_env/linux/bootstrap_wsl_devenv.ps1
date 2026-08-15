@@ -5,13 +5,16 @@
 Sets up a local Linux dev environment (WSL2) for building helium - no Jenkins agent, no Docker.
 .PARAMETER Distro
 WSL distro name to create/use. Defaults to "Ubuntu".
+.PARAMETER Username
+Linux user to create/use inside the distro. Defaults to the current Windows username.
 .EXAMPLE
 .\bootstrap_wsl_devenv.ps1
 .\bootstrap_wsl_devenv.ps1 -Distro helium-dev
 #>
 
 param(
-    [string]$Distro = "Ubuntu"
+    [string]$Distro = "Ubuntu",
+    [string]$Username = $env:USERNAME.ToLower()
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,6 +32,18 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# WSL's first-launch OOBE can silently fall back to root instead of prompting - don't
+# depend on it, ensure the user ourselves and target it explicitly via -u.
+$ensureUser = @"
+id -u $Username &>/dev/null || useradd -m -s /bin/bash -G sudo $Username
+echo '$Username ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/$Username
+"@
+$ensureUser | wsl -d $Distro -u root -- bash -s --
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to ensure user '$Username' exists - see the error above." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
+
 $linuxSetup = @'
 set -euo pipefail
 
@@ -41,11 +56,12 @@ curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env
 chmod +x /tmp/install_build_packages.sh /tmp/install_vcpkg.sh
 
 sudo /tmp/install_build_packages.sh
+RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 /tmp/install_vcpkg.sh
 grep -q '^export VCPKG_ROOT=' ~/.zshenv 2>/dev/null || echo 'export VCPKG_ROOT=$HOME/vcpkg' >> ~/.zshenv
 '@
 
-$linuxSetup | wsl -d $Distro -- bash -s --
+$linuxSetup | wsl -d $Distro -u $Username -- bash -s --
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Setup failed - see the error above." -ForegroundColor Red
     exit $LASTEXITCODE
