@@ -19,10 +19,6 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# PowerShell's default pipe-to-native-process encoding is the console's OEM codepage, not
-# UTF-8 - without this, text piped into wsl.exe (the heredocs below) can get bytes mangled.
-$OutputEncoding = [System.Text.Encoding]::UTF8
-
 # wsl.exe's piped output is UTF-16LE (null byte per char), strip before matching.
 $installedDistros = (wsl -l -q 2>$null) -replace "`0", "" | Where-Object { $_.Trim() -ne "" }
 if ($installedDistros -notcontains $Distro) {
@@ -60,7 +56,7 @@ curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env
 chmod +x /tmp/install_build_packages.sh /tmp/install_vcpkg.sh
 
 sudo /tmp/install_build_packages.sh
-RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" < /dev/null
 /tmp/install_vcpkg.sh
 grep -q '^export VCPKG_ROOT=' ~/.zshenv 2>/dev/null || echo 'export VCPKG_ROOT=$HOME/vcpkg' >> ~/.zshenv
 
