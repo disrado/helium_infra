@@ -16,6 +16,8 @@ services:
     build: .
     image: helium-jenkins-controller:latest
     restart: unless-stopped
+    environment:
+      - TZ=Europe/Kyiv
     volumes:
       - jenkins_home:/var/jenkins_home
     networks:
