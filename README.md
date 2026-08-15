@@ -112,7 +112,7 @@ Native (no containers) - installs the toolchain and registers the agent directly
 #### 1. Create the Jenkins node
 
 Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `windows`, launch: inbound, remote root
-directory `C:\jenkins-agent\workDir`.
+directory `C:\helium_agent\workDir`.
 
 #### 2. Run the bootstrap
 

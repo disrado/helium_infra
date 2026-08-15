@@ -3,13 +3,18 @@
 <#
 .SYNOPSIS
 Installs the native Windows build toolchain under a single root. No Jenkins registration.
+.PARAMETER Root
+Directory to install the toolchain under.
 .EXAMPLE
-.\bootstrap_toolchain.ps1
+.\bootstrap_toolchain.ps1 -Root C:\path\to\toolchain
 #>
 
-$ErrorActionPreference = "Stop"
+param(
+    [Parameter(Mandatory)]
+    [string]$Root
+)
 
-$Root = "C:\jenkins-agent"
+$ErrorActionPreference = "Stop"
 
 $sourceRoot = $PSScriptRoot
 $windowsRoot = "$sourceRoot\.."

@@ -46,7 +46,7 @@ if ($missing.Count -gt 0) {
 
 $ErrorActionPreference = "Stop"
 
-$Root = "C:\jenkins-agent"
+$Root = "C:\helium_agent"
 
 $toolchainRoot = "$PSScriptRoot\devenv"
 $tempZip = $null
@@ -58,7 +58,7 @@ if (-not (Test-Path "$toolchainRoot\toolchain_packages.ps1")) {
     $toolchainRoot = "$tempExtract\helium_infra-main\build_env\windows\devenv"
 }
 
-. "$toolchainRoot\bootstrap_toolchain.ps1"
+. "$toolchainRoot\bootstrap_toolchain.ps1" -Root $Root
 
 New-Item -ItemType Directory -Force -Path "$Root\workDir" | Out-Null
 

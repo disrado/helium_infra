@@ -8,7 +8,7 @@ Tears down the native Windows Jenkins agent - removes the toolchain and schedule
 #>
 
 $ErrorActionPreference = "Stop"
-$Root = "C:\jenkins-agent"
+$Root = "C:\helium_agent"
 
 $windowsRoot = $PSScriptRoot
 $tempZip = $null

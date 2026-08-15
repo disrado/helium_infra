@@ -9,7 +9,9 @@ Sets up a local Windows dev environment for building helium - no Jenkins agent.
 
 $ErrorActionPreference = "Stop"
 
-. "$PSScriptRoot\devenv\bootstrap_toolchain.ps1"
+$Root = "C:\helium_toolchain"
+
+. "$PSScriptRoot\devenv\bootstrap_toolchain.ps1" -Root $Root
 
 $repoRoot = "$env:USERPROFILE\src\helium"
 if (-not (Test-Path "$repoRoot\.git")) {
