@@ -1,5 +1,15 @@
 # helium project infrastructure
 
+- [Setup controller](#setup-controller)
+- [Setup agent](#setup-agent)
+  - [WSL](#wsl)
+  - [Windows](#windows)
+- [Setup devenv](#setup-devenv)
+  - [WSL](#wsl-1)
+  - [Windows](#windows-1)
+- [Updating an existing agent's environment](#updating-an-existing-agents-environment)
+- [Remove agent](#remove-agent)
+
 ## Setup controller
 
 ### 1. Provision a host
@@ -57,16 +67,18 @@ Manually create one Pipeline job named `seed`:
 - uses the `helium_github_app` credential from the previous step (same one the generated jobs use)
 - requires at least one connected agent (`seed`'s pipeline runs `agent any`, and the controller itself has 0 executors).
 
-## Setup WSL agent
+## Setup agent
 
-### 1. Create the Jenkins node
+### WSL
+
+#### 1. Create the Jenkins node
 
 Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `wsl`, launch: inbound, remote root
 directory `/home/jenkins/agent`.
 
-### 2. Run the bootstrap
+#### 2. Run the bootstrap
 
-#### Windows
+##### Windows
 
 Requires virtualization enabled in BIOS/firmware
 
@@ -82,27 +94,27 @@ Args:
 - `-AgentSecret` from the node's config page.
 - `-AgentName` Jenkins node name.
 
-#### Linux
+##### Linux
 
 Docker already running:
 ```
 curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/agent/bootstrap.sh | bash -s -- <jenkins-url> <agent-secret> <agent-name>
 ```
 
-### 3. Verify
+#### 3. Verify
 
 Check node shows connected in Jenkins.
 
-## Setup new Windows agent
+### Windows
 
 Native (no containers) - installs the toolchain and registers the agent directly on the host.
 
-### 1. Create the Jenkins node
+#### 1. Create the Jenkins node
 
 Jenkins → Manage Jenkins → Nodes → New Node → Permanent Agent, label `windows`, launch: inbound, remote root
 directory `C:\jenkins-agent\workDir`.
 
-### 2. Run the bootstrap
+#### 2. Run the bootstrap
 
 Fresh machine (elevated PowerShell):
 ```powershell
@@ -116,11 +128,13 @@ Args:
 - `-AgentSecret` from the node's config page.
 - `-AgentName` Jenkins node name.
 
-### 3. Verify
+#### 3. Verify
 
 Check node shows connected in Jenkins.
 
-## Setup local WSL dev environment
+## Setup devenv
+
+### WSL
 
 No Jenkins registration, no Docker - just the toolchain and a clone of `helium`, for building locally.
 
@@ -135,11 +149,23 @@ Optional args:
 - `-Distro` WSL distro name to create/use. Defaults to `Ubuntu`.
 - `-Username` Linux user to create/use. Defaults to the current Windows username.
 
+### Windows
+
+No Jenkins registration - just the toolchain and a clone of `helium`, for building locally.
+
+Fresh machine (elevated PowerShell):
+```powershell
+irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/windows/bootstrap_windows_devenv.ps1 -OutFile bootstrap_windows_devenv.ps1
+```
+```powershell
+powershell -ExecutionPolicy Bypass -File .\bootstrap_windows_devenv.ps1
+```
+
 ## Updating an existing agent's environment
 
 Don't re-run the bootstrap scripts. Run the `update_agent_env` Jenkins job instead - rebuilds images or reinstalls the toolchain without touching the running agent.
 
-## Removing an agent
+## Remove agent
 
 Run on the machine itself (elevated PowerShell), not through Jenkins. Leaves the Jenkins node itself in place -
 delete it manually in Jenkins after the script finishes.
