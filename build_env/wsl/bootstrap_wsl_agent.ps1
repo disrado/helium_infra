@@ -9,6 +9,8 @@ Jenkins controller URL, e.g. https://jenkins.example.com/
 Agent connection secret from Jenkins' node config page.
 .PARAMETER AgentName
 Jenkins node name.
+.PARAMETER Username
+Linux user to create/use inside the distro. Defaults to the current Windows username.
 .EXAMPLE
 .\bootstrap_wsl_agent.ps1 -JenkinsUrl https://jenkins.example.com/ -AgentSecret abc123 -AgentName wsl-agent
 #>
@@ -16,7 +18,8 @@ Jenkins node name.
 param(
     [string]$JenkinsUrl,
     [string]$AgentSecret,
-    [string]$AgentName
+    [string]$AgentName,
+    [string]$Username = $env:USERNAME.ToLower()
 )
 
 $Distro = "Ubuntu"
@@ -81,13 +84,21 @@ schtasks.exe /create /tn "wsl-autostart" /tr "powershell.exe -WindowStyle Hidden
 # /create only takes effect next boot - run it once now too.
 schtasks.exe /run /tn "wsl-autostart"
 
-wsl -d $Distro -- bash -c "curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/agent/agent_setup.sh -o /tmp/agent_setup.sh && chmod +x /tmp/agent_setup.sh"
+# WSL's first-launch OOBE can silently fall back to root instead of prompting - don't
+# depend on it, ensure the user ourselves and target it explicitly via -u.
+wsl -d $Distro -u root -- bash -c "curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/devenv/ensure_user.sh -o /tmp/ensure_user.sh && chmod +x /tmp/ensure_user.sh && /tmp/ensure_user.sh $Username"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to ensure user '$Username' exists - see the error above." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
+
+wsl -d $Distro -u $Username -- bash -c "curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/agent/agent_setup.sh -o /tmp/agent_setup.sh && chmod +x /tmp/agent_setup.sh"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to fetch agent_setup.sh - see the error above." -ForegroundColor Red
     exit $LASTEXITCODE
 }
 
-wsl -d $Distro -- /tmp/agent_setup.sh "$JenkinsUrl" "$AgentSecret" "$AgentName"
+wsl -d $Distro -u $Username -- /tmp/agent_setup.sh "$JenkinsUrl" "$AgentSecret" "$AgentName"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Setup failed - see the error above." -ForegroundColor Red
     exit $LASTEXITCODE
