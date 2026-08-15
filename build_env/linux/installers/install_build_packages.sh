@@ -9,4 +9,4 @@ apt-get install -y \
     gcc-16 g++-16
 rm -rf /var/lib/apt/lists/*
 
-pip install --break-system-packages cmake scons
+pip install --break-system-packages --root-user-action=ignore cmake scons

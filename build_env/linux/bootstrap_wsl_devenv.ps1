@@ -42,7 +42,7 @@ chmod +x /tmp/install_build_packages.sh /tmp/install_vcpkg.sh
 
 sudo /tmp/install_build_packages.sh
 /tmp/install_vcpkg.sh
-grep -q '^export VCPKG_ROOT=' ~/.zshrc 2>/dev/null || echo 'export VCPKG_ROOT=$HOME/vcpkg' >> ~/.zshrc
+grep -q '^export VCPKG_ROOT=' ~/.zshenv 2>/dev/null || echo 'export VCPKG_ROOT=$HOME/vcpkg' >> ~/.zshenv
 '@
 
 $linuxSetup | wsl -d $Distro -- bash -s --
