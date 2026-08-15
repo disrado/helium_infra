@@ -19,6 +19,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# PowerShell's default pipe-to-native-process encoding is the console's OEM codepage, not
+# UTF-8 - without this, text piped into wsl.exe (the heredocs below) can get bytes mangled.
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
 # wsl.exe's piped output is UTF-16LE (null byte per char), strip before matching.
 $installedDistros = (wsl -l -q 2>$null) -replace "`0", "" | Where-Object { $_.Trim() -ne "" }
 if ($installedDistros -notcontains $Distro) {
