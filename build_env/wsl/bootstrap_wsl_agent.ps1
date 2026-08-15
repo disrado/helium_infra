@@ -65,12 +65,10 @@ if ($LASTEXITCODE -ne 0) {
 $wslConfigPath = "$env:USERPROFILE\.wslconfig"
 $wslConfig = if (Test-Path $wslConfigPath) { Get-Content $wslConfigPath -Raw } else { "" }
 if ($wslConfig -notmatch "vmIdleTimeout") {
-    if ($wslConfig -match "(?m)^\[wsl2\]\s*$") {
-        # teardown strips the key but not the header - reuse it instead of duplicating.
-        $wslConfig = $wslConfig -replace "(?m)^\[wsl2\]\s*$", "[wsl2]`nvmIdleTimeout=-1"
-    } else {
-        $wslConfig += "`n[wsl2]`nvmIdleTimeout=-1`n"
-    }
+    # Strip any stale/orphaned [wsl2] section first rather than trying to detect and reuse
+    # an existing header - more robust against whatever shape a prior run left behind.
+    $kept = ($wslConfig -split "`r?`n") | Where-Object { $_ -notmatch "^\[wsl2\]\s*$" -and $_ -notmatch "vmIdleTimeout" }
+    $wslConfig = (($kept -join "`n").TrimEnd()) + "`n`n[wsl2]`nvmIdleTimeout=-1`n"
     Set-Content -Path $wslConfigPath -Value $wslConfig
     wsl --shutdown
 }
@@ -83,40 +81,13 @@ schtasks.exe /create /tn "wsl-autostart" /tr "powershell.exe -WindowStyle Hidden
 # /create only takes effect next boot - run it once now too.
 schtasks.exe /run /tn "wsl-autostart"
 
-$linuxSetup = @'
-set -euo pipefail
+wsl -d $Distro -- bash -c "curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/agent/agent_setup.sh -o /tmp/agent_setup.sh && chmod +x /tmp/agent_setup.sh"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to fetch agent_setup.sh - see the error above." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
 
-# systemd (needed for dockerd, systemd-timesyncd)
-sudo grep -q '^systemd=true' /etc/wsl.conf 2>/dev/null || printf '[boot]\nsystemd=true\n' | sudo tee -a /etc/wsl.conf >/dev/null
-
-# clock-drift fix: systemd-timesyncd's ConditionVirtualization trips on WSL2
-dpkg -s systemd-timesyncd &>/dev/null || { sudo apt-get update -qq && sudo apt-get install -y systemd-timesyncd; }
-sudo cp /usr/lib/systemd/system/systemd-timesyncd.service /etc/systemd/system/systemd-timesyncd.service
-sudo sed -i '/ConditionVirtualization/d' /etc/systemd/system/systemd-timesyncd.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now systemd-timesyncd
-
-# native Docker Engine; patches out get.docker.com's WSL-detected nag sleep
-if ! command -v docker &>/dev/null; then
-    curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
-    sed -i 's/sleep 20/sleep 1/' /tmp/get-docker.sh
-    sudo sh /tmp/get-docker.sh
-    rm -f /tmp/get-docker.sh
-    sudo usermod -aG docker "$USER"
-fi
-
-# passwordless sudo, for non-interactive remote automation
-sudo grep -q "^$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers.d/wsl-agent 2>/dev/null || \
-    echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/wsl-agent >/dev/null
-
-curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/agent/bootstrap.sh -o /tmp/bootstrap.sh
-chmod +x /tmp/bootstrap.sh
-
-# sudo not sg: group change needs a new session anyway, and sg isn't always present
-sudo /tmp/bootstrap.sh "$1" "$2" "$3"
-'@
-
-$linuxSetup | wsl -d $Distro -- bash -s -- "$JenkinsUrl" "$AgentSecret" "$AgentName"
+wsl -d $Distro -- /tmp/agent_setup.sh "$JenkinsUrl" "$AgentSecret" "$AgentName"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Setup failed - see the error above." -ForegroundColor Red
     exit $LASTEXITCODE

@@ -17,7 +17,7 @@ try { wsl --unregister $Distro } catch { Write-Warning "wsl unregister failed, c
 try {
     $wslConfigPath = "$env:USERPROFILE\.wslconfig"
     if (Test-Path $wslConfigPath) {
-        (Get-Content $wslConfigPath) | Where-Object { $_ -notmatch "vmIdleTimeout" } | Set-Content $wslConfigPath
+        (Get-Content $wslConfigPath) | Where-Object { $_ -notmatch "^\[wsl2\]\s*$" -and $_ -notmatch "vmIdleTimeout" } | Set-Content $wslConfigPath
     }
 } catch {
     Write-Warning ".wslconfig cleanup failed, continuing: $_"

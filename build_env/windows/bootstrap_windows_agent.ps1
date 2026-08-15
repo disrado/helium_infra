@@ -48,14 +48,14 @@ $ErrorActionPreference = "Stop"
 
 $Root = "C:\jenkins-agent"
 
-$toolchainRoot = $PSScriptRoot
+$toolchainRoot = "$PSScriptRoot\devenv"
 $tempZip = $null
 if (-not (Test-Path "$toolchainRoot\toolchain_packages.ps1")) {
     $tempZip = "$env:TEMP\helium_infra.zip"
     $tempExtract = "$env:TEMP\helium_infra_extract"
     Invoke-WebRequest -Uri "https://github.com/disrado/helium_infra/archive/refs/heads/main.zip" -OutFile $tempZip
     Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
-    $toolchainRoot = "$tempExtract\helium_infra-main\build_env\windows"
+    $toolchainRoot = "$tempExtract\helium_infra-main\build_env\windows\devenv"
 }
 
 . "$toolchainRoot\bootstrap_toolchain.ps1"

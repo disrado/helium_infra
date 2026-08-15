@@ -10,18 +10,18 @@ Tears down the native Windows Jenkins agent - removes the toolchain and schedule
 $ErrorActionPreference = "Stop"
 $Root = "C:\jenkins-agent"
 
-$toolchainRoot = $PSScriptRoot
+$windowsRoot = $PSScriptRoot
 $tempZip = $null
-if (-not (Test-Path "$toolchainRoot\toolchain_packages.ps1")) {
+if (-not (Test-Path "$windowsRoot\devenv\toolchain_packages.ps1")) {
     $tempZip = "$env:TEMP\helium_infra.zip"
     $tempExtract = "$env:TEMP\helium_infra_extract"
     Invoke-WebRequest -Uri "https://github.com/disrado/helium_infra/archive/refs/heads/main.zip" -OutFile $tempZip
     Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
-    $toolchainRoot = "$tempExtract\helium_infra-main\build_env\windows"
+    $windowsRoot = "$tempExtract\helium_infra-main\build_env\windows"
 }
 
-. "$toolchainRoot\toolchain_packages.ps1"
-foreach ($name in $Packages) { . "$toolchainRoot\installers\packages\$name.ps1" }
+. "$windowsRoot\devenv\toolchain_packages.ps1"
+foreach ($name in $Packages) { . "$windowsRoot\installers\packages\$name.ps1" }
 
 Unregister-ScheduledTask -TaskName "windows-agent-autostart" -Confirm:$false -ErrorAction SilentlyContinue
 

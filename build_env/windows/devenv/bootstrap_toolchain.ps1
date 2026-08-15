@@ -12,17 +12,19 @@ $ErrorActionPreference = "Stop"
 $Root = "C:\jenkins-agent"
 
 $sourceRoot = $PSScriptRoot
+$windowsRoot = "$sourceRoot\.."
 $tempZip = $null
 if (-not (Test-Path "$sourceRoot\toolchain_packages.ps1")) {
     $tempZip = "$env:TEMP\helium_infra.zip"
     $tempExtract = "$env:TEMP\helium_infra_extract"
     Invoke-WebRequest -Uri "https://github.com/disrado/helium_infra/archive/refs/heads/main.zip" -OutFile $tempZip
     Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
-    $sourceRoot = "$tempExtract\helium_infra-main\build_env\windows"
+    $windowsRoot = "$tempExtract\helium_infra-main\build_env\windows"
+    $sourceRoot = "$windowsRoot\devenv"
 }
 
 . "$sourceRoot\toolchain_packages.ps1"
-foreach ($name in $Packages) { . "$sourceRoot\installers\packages\$name.ps1" }
+foreach ($name in $Packages) { . "$windowsRoot\installers\packages\$name.ps1" }
 
 New-Item -ItemType Directory -Force -Path @($Root, "$Root\toolchain") | Out-Null
 
