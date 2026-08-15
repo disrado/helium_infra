@@ -59,6 +59,10 @@ sudo /tmp/install_build_packages.sh
 RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 /tmp/install_vcpkg.sh
 grep -q '^export VCPKG_ROOT=' ~/.zshenv 2>/dev/null || echo 'export VCPKG_ROOT=$HOME/vcpkg' >> ~/.zshenv
+
+mkdir -p ~/src
+[ -d ~/src/helium/.git ] || git clone https://github.com/disrado/helium.git ~/src/helium
+git -C ~/src/helium submodule update --init deps/godot_cpp
 '@
 
 $linuxSetup | wsl -d $Distro -u $Username -- bash -s --
