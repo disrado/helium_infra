@@ -36,13 +36,13 @@ if ($LASTEXITCODE -ne 0) {
 # depend on it, ensure the user ourselves and target it explicitly via -u. Setup logic lives
 # in real .sh files fetched via curl (not inline heredocs) - PowerShell here-strings normalize
 # to CRLF internally regardless of the source file's own line endings, which corrupts bash.
-wsl -d $Distro -u root -- bash -c "curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/devenv/ensure_user.sh -o /tmp/ensure_user.sh && chmod +x /tmp/ensure_user.sh && /tmp/ensure_user.sh $Username"
+wsl -d $Distro -u root -- bash -c "curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/devenv/ensure_user.sh -o /tmp/ensure_user.sh && chmod +x /tmp/ensure_user.sh && /tmp/ensure_user.sh $Username"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to ensure user '$Username' exists - see the error above." -ForegroundColor Red
     exit $LASTEXITCODE
 }
 
-wsl -d $Distro -u $Username -- bash -c "curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/devenv/devenv_setup.sh -o /tmp/devenv_setup.sh && chmod +x /tmp/devenv_setup.sh && /tmp/devenv_setup.sh"
+wsl -d $Distro -u $Username -- bash -c "curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/devenv/devenv_setup.sh -o /tmp/devenv_setup.sh && chmod +x /tmp/devenv_setup.sh && /tmp/devenv_setup.sh"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Setup failed - see the error above." -ForegroundColor Red
     exit $LASTEXITCODE

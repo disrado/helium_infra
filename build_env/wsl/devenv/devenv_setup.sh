@@ -5,8 +5,8 @@ sudo apt-get update && sudo apt-get install -y git-lfs zsh
 git lfs install
 sudo chsh -s "$(which zsh)" "$USER"
 
-curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/installers/install_build_packages.sh -o /tmp/install_build_packages.sh
-curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/installers/install_vcpkg.sh -o /tmp/install_vcpkg.sh
+curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/installers/install_build_packages.sh -o /tmp/install_build_packages.sh
+curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/installers/install_vcpkg.sh -o /tmp/install_vcpkg.sh
 chmod +x /tmp/install_build_packages.sh /tmp/install_vcpkg.sh
 
 sudo /tmp/install_build_packages.sh

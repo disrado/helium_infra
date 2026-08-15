@@ -12,7 +12,7 @@ JENKINS_AGENT_NAME="$(echo -n "$JENKINS_AGENT_NAME" | tr -d '\r')"
 
 REPO_DIR="$HOME/helium_infra"
 [ -d "$REPO_DIR" ] || git clone https://github.com/disrado/helium_infra.git "$REPO_DIR"
-cd "$REPO_DIR/build_env/linux"
+cd "$REPO_DIR/build_env/wsl/agent"
 
 bash build_images.sh
 

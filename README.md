@@ -72,7 +72,7 @@ Requires virtualization enabled in BIOS/firmware
 
 Fresh machine (elevated PowerShell):
 ```powershell
-irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap_wsl_agent.ps1 -OutFile bootstrap_wsl_agent.ps1
+irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/bootstrap_wsl_agent.ps1 -OutFile bootstrap_wsl_agent.ps1
 ```
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\bootstrap_wsl_agent.ps1 -JenkinsUrl <jenkins-url> -AgentSecret <agent-secret> -AgentName <agent-name>
@@ -86,7 +86,7 @@ Args:
 
 Docker already running:
 ```
-curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/bootstrap.sh | bash -s -- <jenkins-url> <agent-secret> <agent-name>
+curl -fsSL https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/agent/bootstrap.sh | bash -s -- <jenkins-url> <agent-secret> <agent-name>
 ```
 
 ### 3. Verify
@@ -131,7 +131,7 @@ delete it manually in Jenkins after the script finishes.
 
 **WSL:**
 ```powershell
-irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/linux/tear_down_wsl_agent.ps1 -OutFile tear_down_wsl_agent.ps1
+irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/tear_down_wsl_agent.ps1 -OutFile tear_down_wsl_agent.ps1
 ```
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\tear_down_wsl_agent.ps1

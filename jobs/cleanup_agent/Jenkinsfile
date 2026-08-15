@@ -9,9 +9,9 @@ pipeline {
             steps {
                 script {
                     if (env.NODE_LABELS.tokenize().contains('wsl')) {
-                        sh 'bash build_env/linux/cleanup_agent.sh'
+                        sh 'bash build_env/wsl/agent/cleanup_agent.sh'
                     } else {
-                        bat 'powershell -ExecutionPolicy Bypass -File build_env/windows/cleanup_agent.ps1'
+                        bat 'powershell -ExecutionPolicy Bypass -File build_env/windows/agent/cleanup_agent.ps1'
                     }
                 }
             }

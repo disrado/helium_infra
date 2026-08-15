@@ -12,7 +12,7 @@ pipeline {
             steps {
                 script {
                     if (env.NODE_LABELS.tokenize().contains('wsl')) {
-                        sh 'bash build_env/linux/build_images.sh'
+                        sh 'bash build_env/wsl/agent/build_images.sh'
                     } else {
                         bat 'powershell -ExecutionPolicy Bypass -File build_env/windows/bootstrap_toolchain.ps1'
                     }
