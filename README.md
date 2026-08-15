@@ -120,6 +120,21 @@ Args:
 
 Check node shows connected in Jenkins.
 
+## Setup local WSL dev environment
+
+No Jenkins registration, no Docker - just the toolchain and a clone of `helium`, for building locally.
+
+Fresh machine (elevated PowerShell):
+```powershell
+irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/wsl/bootstrap_wsl_devenv.ps1 -OutFile bootstrap_wsl_devenv.ps1
+```
+```powershell
+powershell -ExecutionPolicy Bypass -File .\bootstrap_wsl_devenv.ps1
+```
+Optional args:
+- `-Distro` WSL distro name to create/use. Defaults to `Ubuntu`.
+- `-Username` Linux user to create/use. Defaults to the current Windows username.
+
 ## Updating an existing agent's environment
 
 Don't re-run the bootstrap scripts. Run the `update_agent_env` Jenkins job instead - rebuilds images or reinstalls the toolchain without touching the running agent.
