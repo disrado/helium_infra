@@ -7,7 +7,7 @@
 - [Setup devenv](#setup-devenv)
   - [WSL](#wsl-1)
   - [Windows](#windows-1)
-- [Updating an existing agent's environment](#updating-an-existing-agents-environment)
+- [Update agent](#update-agent)
 - [Remove agent](#remove-agent)
 
 ## Setup controller
@@ -161,7 +161,7 @@ irm https://raw.githubusercontent.com/disrado/helium_infra/main/build_env/window
 powershell -ExecutionPolicy Bypass -File .\bootstrap_windows_devenv.ps1
 ```
 
-## Updating an existing agent's environment
+## Update agent
 
 Don't re-run the bootstrap scripts. Run the `update_agent_env` Jenkins job instead - rebuilds images or reinstalls the toolchain without touching the running agent.
 
