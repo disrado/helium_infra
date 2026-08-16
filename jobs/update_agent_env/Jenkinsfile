@@ -14,7 +14,7 @@ pipeline {
                     if (env.NODE_LABELS.tokenize().contains('wsl')) {
                         sh 'bash build_env/wsl/agent/build_images.sh'
                     } else {
-                        bat 'powershell -ExecutionPolicy Bypass -File build_env/windows/devenv/bootstrap_toolchain.ps1 -Root C:\helium_agent'
+                        bat 'powershell -ExecutionPolicy Bypass -File build_env/windows/devenv/bootstrap_toolchain.ps1 -Root C:/helium_agent'
                     }
                 }
             }
