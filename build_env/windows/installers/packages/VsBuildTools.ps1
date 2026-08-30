@@ -7,8 +7,12 @@ function Install-VsBuildTools
     $version = "17.14.37"
     $location = "$Root\toolchain\vs-buildtools"
     $marker = "$location\VC\Auxiliary\Build\vcvarsall.bat"
-    $installed = winget list --exact --id $id --accept-source-agreements 2>$null
-    if ((Test-Path $marker) -and ($installed -match [regex]::Escape($version))) { return }
+    # winget list reports this product as "< <newer version>" once a newer catalog version
+    # exists, never the exact installed version, so it can't be used to detect a matching
+    # pin - query the VS Installer's own instance metadata instead.
+    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+    $installedVersion = if (Test-Path $vswhere) { & $vswhere -path $location -property catalog_productSemanticVersion } else { $null }
+    if ((Test-Path $marker) -and ($installedVersion -like "$version+*")) { return }
     winget install --exact --id $id --version $version --silent --accept-package-agreements --accept-source-agreements --override "--installPath $location --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait --norestart"
     if ($LASTEXITCODE -eq 3010) {
         Write-Host "VS Build Tools installed - reboot recommended, continuing anyway." -ForegroundColor Yellow
